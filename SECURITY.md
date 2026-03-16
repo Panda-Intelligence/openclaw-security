@@ -4,7 +4,7 @@
 
 If you discover a security vulnerability in OpenClaw Security, please report it responsibly.
 
-**Do not open a public issue.** Instead, email security@openclaw.com with:
+**Do not open a public issue.** Instead, email security@pandacat.ai with:
 
 1. Description of the vulnerability
 2. Steps to reproduce

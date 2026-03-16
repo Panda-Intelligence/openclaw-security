@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import type { ScanResult } from '@openclaw-security/scanner-core';
+import type { ScanResult } from '@panda-ai/ocs-core';
 import { printTable } from '../src/output/table';
 
 function makeScanResult(overrides?: Partial<ScanResult>): ScanResult {

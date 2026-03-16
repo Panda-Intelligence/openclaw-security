@@ -1,5 +1,5 @@
 {
-  "name": "@openclaw-security/extension",
+  "name": "@panda-ai/ocs-extension",
   "version": "0.1.0",
   "private": true,
   "type": "module",

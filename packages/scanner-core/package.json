@@ -1,5 +1,5 @@
 {
-  "name": "@openclaw-security/scanner-core",
+  "name": "@panda-ai/ocs-core",
   "version": "0.1.0",
   "private": true,
   "type": "module",

@@ -1,5 +1,5 @@
 {
-  "name": "@openclaw-security/web",
+  "name": "@panda-ai/ocs-web",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -11,7 +11,7 @@
     "test": "bun test"
   },
   "dependencies": {
-    "@openclaw-security/scanner-core": "workspace:*",
+    "@panda-ai/ocs-core": "workspace:*",
     "hono": "^4.7.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

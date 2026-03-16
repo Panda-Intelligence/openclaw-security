@@ -1,4 +1,4 @@
-import type { ScanResult, Severity } from '@openclaw-security/scanner-core';
+import type { ScanResult, Severity } from '@panda-ai/ocs-core';
 
 const COLORS = {
   reset: '\x1b[0m',

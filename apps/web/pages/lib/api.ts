@@ -1,4 +1,4 @@
-import type { Severity } from '@openclaw-security/scanner-core';
+import type { Severity } from '@panda-ai/ocs-core';
 
 const API_BASE = '/api';
 const TOKEN_KEY = 'ocs_token';

@@ -1,4 +1,4 @@
-import type { Severity } from '@openclaw-security/scanner-core';
+import type { Severity } from '@panda-ai/ocs-core';
 import type { FindingRecord, ReportData } from '../lib/api';
 import { FindingCard } from './FindingCard';
 import { ScoreGauge } from './ScoreGauge';

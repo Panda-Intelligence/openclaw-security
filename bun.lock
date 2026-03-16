@@ -11,7 +11,7 @@
       },
     },
     "apps/extension": {
-      "name": "@openclaw-security/extension",
+      "name": "@panda-ai/ocs-extension",
       "version": "0.1.0",
       "dependencies": {
         "react": "^19.0.0",
@@ -25,10 +25,10 @@
       },
     },
     "apps/web": {
-      "name": "@openclaw-security/web",
+      "name": "@panda-ai/ocs-web",
       "version": "0.1.0",
       "dependencies": {
-        "@openclaw-security/scanner-core": "workspace:*",
+        "@panda-ai/ocs-core": "workspace:*",
         "hono": "^4.7.0",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
@@ -45,13 +45,13 @@
       },
     },
     "packages/cli": {
-      "name": "@openclaw-security/cli",
+      "name": "@panda-ai/ocs-cli",
       "version": "0.1.0",
       "bin": {
-        "openclaw-security": "src/index.ts",
+        "ocs": "src/index.ts",
       },
       "dependencies": {
-        "@openclaw-security/scanner-core": "workspace:*",
+        "@panda-ai/ocs-core": "workspace:*",
       },
       "devDependencies": {
         "@types/bun": "^1.2.0",
@@ -59,7 +59,7 @@
       },
     },
     "packages/scanner-core": {
-      "name": "@openclaw-security/scanner-core",
+      "name": "@panda-ai/ocs-core",
       "version": "0.1.0",
       "devDependencies": {
         "@types/bun": "^1.2.0",
@@ -220,17 +220,17 @@
 
     "@napi-rs/wasm-runtime": ["@napi-rs/wasm-runtime@1.1.1", "", { "dependencies": { "@emnapi/core": "^1.7.1", "@emnapi/runtime": "^1.7.1", "@tybys/wasm-util": "^0.10.1" } }, "sha512-p64ah1M1ld8xjWv3qbvFwHiFVWrq1yFvV4f7w+mzaqiR4IlSgkqhcRdHwsGgomwzBH51sRY4NEowLxnaBjcW/A=="],
 
-    "@openclaw-security/cli": ["@openclaw-security/cli@workspace:packages/cli"],
-
-    "@openclaw-security/extension": ["@openclaw-security/extension@workspace:apps/extension"],
-
-    "@openclaw-security/scanner-core": ["@openclaw-security/scanner-core@workspace:packages/scanner-core"],
-
-    "@openclaw-security/web": ["@openclaw-security/web@workspace:apps/web"],
-
     "@oxc-project/runtime": ["@oxc-project/runtime@0.115.0", "", {}, "sha512-Rg8Wlt5dCbXhQnsXPrkOjL1DTSvXLgb2R/KYfnf1/K+R0k6UMLEmbQXPM+kwrWqSmWA2t0B1EtHy2/3zikQpvQ=="],
 
     "@oxc-project/types": ["@oxc-project/types@0.115.0", "", {}, "sha512-4n91DKnebUS4yjUHl2g3/b2T+IUdCfmoZGhmwsovZCDaJSs+QkVAM+0AqqTxHSsHfeiMuueT75cZaZcT/m0pSw=="],
+
+    "@panda-ai/ocs-cli": ["@panda-ai/ocs-cli@workspace:packages/cli"],
+
+    "@panda-ai/ocs-core": ["@panda-ai/ocs-core@workspace:packages/scanner-core"],
+
+    "@panda-ai/ocs-extension": ["@panda-ai/ocs-extension@workspace:apps/extension"],
+
+    "@panda-ai/ocs-web": ["@panda-ai/ocs-web@workspace:apps/web"],
 
     "@poppinss/colors": ["@poppinss/colors@4.1.6", "", { "dependencies": { "kleur": "^4.1.5" } }, "sha512-H9xkIdFswbS8n1d6vmRd8+c10t2Qe+rZITbbDHHkQixH5+2x1FDGmi/0K+WgWiqQFKPSlIYB7jlH6Kpfn6Fleg=="],
 

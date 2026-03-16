@@ -1,5 +1,5 @@
-import type { ScanConfig, ScanResult } from '@openclaw-security/scanner-core';
-import { scan } from '@openclaw-security/scanner-core';
+import type { ScanConfig, ScanResult } from '@panda-ai/ocs-core';
+import { scan } from '@panda-ai/ocs-core';
 import type { Env } from '../worker';
 
 export async function handleScanQueue(message: { scanId: string; jwt?: string }, env: Env): Promise<void> {

@@ -39,15 +39,15 @@ name = "openclaw-security-web"
 
 [env.production.vars]
 GOOGLE_CLIENT_ID = ""
-GOOGLE_REDIRECT_URI = "https://security.openclaw.com/api/auth/google/callback"
+GOOGLE_REDIRECT_URI = "https://security.pandacat.ai/api/auth/google/callback"
 GITHUB_CLIENT_ID = ""
-GITHUB_REDIRECT_URI = "https://security.openclaw.com/api/auth/github/callback"
+GITHUB_REDIRECT_URI = "https://security.pandacat.ai/api/auth/github/callback"
 STRIPE_PRICE_STARTER = ""
 
 [[env.production.d1_databases]]
 binding = "DB"
 database_name = "openclaw-security-db"
-database_id = "placeholder-set-after-create"
+database_id = "3ce95d4c-c1d8-4bf4-ba94-d4b117892f98"
 
 [[env.production.queues.producers]]
 binding = "SCAN_QUEUE"
@@ -64,15 +64,15 @@ name = "openclaw-security-web-staging"
 
 [env.staging.vars]
 GOOGLE_CLIENT_ID = ""
-GOOGLE_REDIRECT_URI = "https://staging.security.openclaw.com/api/auth/google/callback"
+GOOGLE_REDIRECT_URI = "https://staging.security.pandacat.ai/api/auth/google/callback"
 GITHUB_CLIENT_ID = ""
-GITHUB_REDIRECT_URI = "https://staging.security.openclaw.com/api/auth/github/callback"
+GITHUB_REDIRECT_URI = "https://staging.security.pandacat.ai/api/auth/github/callback"
 STRIPE_PRICE_STARTER = ""
 
 [[env.staging.d1_databases]]
 binding = "DB"
 database_name = "openclaw-security-db-staging"
-database_id = "placeholder-set-after-create"
+database_id = "f80bbf9b-910f-4b2c-8c5a-dafa484c1349"
 
 [[env.staging.queues.producers]]
 binding = "SCAN_QUEUE"

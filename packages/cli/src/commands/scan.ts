@@ -1,5 +1,5 @@
-import type { ReportFormat, ScanConfig, ScanMode } from '@openclaw-security/scanner-core';
-import { formatReport, scan } from '@openclaw-security/scanner-core';
+import type { ReportFormat, ScanConfig, ScanMode } from '@panda-ai/ocs-core';
+import { formatReport, scan } from '@panda-ai/ocs-core';
 import { writeFileSync } from 'fs';
 import { printTable } from '../output/table';
 

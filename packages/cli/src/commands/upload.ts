@@ -1,4 +1,4 @@
-import type { ScanResult } from '@openclaw-security/scanner-core';
+import type { ScanResult } from '@panda-ai/ocs-core';
 import { readFileSync } from 'fs';
 
 export async function runUploadCommand(args: string[]): Promise<void> {
@@ -27,7 +27,7 @@ export async function runUploadCommand(args: string[]): Promise<void> {
     mode: result.mode,
   };
 
-  const apiUrl = process.env['OPENCLAW_SECURITY_API'] ?? 'https://security.openclaw.com';
+  const apiUrl = process.env['OPENCLAW_SECURITY_API'] ?? 'https://security.pandacat.ai';
 
   console.log(`\n  Uploading anonymized report to ${apiUrl}...`);
   console.log(`  Host: ${payload.targetHost}`);

@@ -39,7 +39,7 @@ app.use(
       if (!origin) return '*';
       if (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) return origin;
       // Production: restrict to the deployed domain
-      if (origin.endsWith('.openclaw.com') || origin === 'https://openclaw.com') return origin;
+      if (origin.endsWith('.pandacat.ai') || origin === 'https://pandacat.ai') return origin;
       return null;
     },
     allowMethods: ['GET', 'POST', 'DELETE', 'OPTIONS'],

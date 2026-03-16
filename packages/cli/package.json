@@ -1,17 +1,17 @@
 {
-  "name": "@openclaw-security/cli",
+  "name": "@panda-ai/ocs-cli",
   "version": "0.1.0",
   "private": true,
   "type": "module",
   "bin": {
-    "openclaw-security": "src/index.ts"
+    "ocs": "src/index.ts"
   },
   "scripts": {
     "test": "bun test",
     "build": "bunx tsc"
   },
   "dependencies": {
-    "@openclaw-security/scanner-core": "workspace:*"
+    "@panda-ai/ocs-core": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.7.0",

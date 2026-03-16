@@ -1,0 +1,11 @@
+# Local development secrets — loaded automatically by wrangler dev.
+# This file is gitignored. Never commit real credentials.
+#
+# For production/staging: use `wrangler secret put <NAME> --env production`
+
+JWT_SECRET=
+GOOGLE_CLIENT_SECRET=
+GITHUB_CLIENT_SECRET=
+
+STRIPE_SECRET_KEY=
+STRIPE_WEBHOOK_SECRET=
