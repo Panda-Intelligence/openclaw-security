@@ -1,66 +1,90 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { ReportView } from './components/ReportView';
+import LoginPage from './auth/login';
+import DashboardPage from './app/dashboard';
+import PricingPage from './app/pricing';
+import CommunityPage from './community/page';
+import BlogPage from './blog/page';
 import { ScanForm } from './components/ScanForm';
 import { ScanProgress } from './components/ScanProgress';
+import { ReportView } from './components/ReportView';
+import { isLoggedIn, setToken } from './lib/api';
 import type { ReportData } from './lib/api';
 
-type View = 'home' | 'scanning' | 'report';
+type Route = 'home' | 'scanning' | 'report' | 'login' | 'dashboard' | 'pricing' | 'community' | 'blog';
 
-interface ScanState {
-  scanId: string | null;
-  report: ReportData | null;
+function getInitialRoute(): Route {
+  const path = window.location.pathname;
+  if (path.startsWith('/auth/login')) return 'login';
+  if (path.startsWith('/app/dashboard')) return 'dashboard';
+  if (path.startsWith('/pricing')) return 'pricing';
+  if (path.startsWith('/community')) return 'community';
+  if (path.startsWith('/blog')) return 'blog';
+  return 'home';
 }
 
 function App() {
-  const [view, setView] = useState<View>('home');
-  const [state, setState] = useState<ScanState>({ scanId: null, report: null });
+  const [route, setRoute] = useState<Route>(getInitialRoute);
+  const [scanId, setScanId] = useState<string | null>(null);
+  const [report, setReport] = useState<ReportData | null>(null);
 
-  const handleScanStart = (scanId: string) => {
-    setState({ scanId, report: null });
-    setView('scanning');
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get('token');
+    if (token) {
+      setToken(token);
+      window.history.replaceState({}, '', window.location.pathname);
+      setRoute('dashboard');
+    }
+  }, []);
+
+  const navigate = (r: Route) => {
+    const paths: Record<Route, string> = {
+      home: '/', scanning: '/', report: '/',
+      login: '/auth/login', dashboard: '/app/dashboard',
+      pricing: '/pricing', community: '/community', blog: '/blog',
+    };
+    window.history.pushState({}, '', paths[r]);
+    setRoute(r);
   };
 
-  const handleScanComplete = (report: ReportData) => {
-    setState((prev) => ({ ...prev, report }));
-    setView('report');
-  };
-
-  const handleReset = () => {
-    setState({ scanId: null, report: null });
-    setView('home');
-  };
+  const handleScanStart = (id: string) => { setScanId(id); setRoute('scanning'); };
+  const handleScanComplete = (r: ReportData) => { setReport(r); setRoute('report'); };
+  const handleReset = () => { setScanId(null); setReport(null); setRoute('home'); };
 
   return (
     <div>
-      <header
-        style={{
-          textAlign: 'center',
-          marginBottom: '3rem',
-          paddingTop: '1rem',
-        }}
-      >
-        <h1
-          style={{
-            fontSize: '2rem',
-            fontWeight: 700,
-            background: 'linear-gradient(135deg, #6366f1, #a855f7)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            marginBottom: '0.5rem',
-          }}
-        >
+      <nav style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 2rem', borderBottom: '1px solid var(--border)' }}>
+        <a href="/" onClick={(e) => { e.preventDefault(); navigate('home'); }} style={{ color: 'var(--accent)', fontWeight: 700, fontSize: '1.1rem', textDecoration: 'none' }}>
           OpenClaw Security
-        </h1>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>Security audit for OpenClaw deployments</p>
-      </header>
+        </a>
+        <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+          <a href="/pricing" onClick={(e) => { e.preventDefault(); navigate('pricing'); }} style={navLink}>Pricing</a>
+          <a href="/community" onClick={(e) => { e.preventDefault(); navigate('community'); }} style={navLink}>Community</a>
+          <a href="/blog" onClick={(e) => { e.preventDefault(); navigate('blog'); }} style={navLink}>Blog</a>
+          {isLoggedIn() ? (
+            <a href="/app/dashboard" onClick={(e) => { e.preventDefault(); navigate('dashboard'); }} style={{ ...navLink, color: 'var(--accent)' }}>Dashboard</a>
+          ) : (
+            <a href="/auth/login" onClick={(e) => { e.preventDefault(); navigate('login'); }} style={{ ...navLink, color: 'var(--accent)' }}>Sign in</a>
+          )}
+        </div>
+      </nav>
 
-      {view === 'home' && <ScanForm onStart={handleScanStart} />}
-      {view === 'scanning' && state.scanId && <ScanProgress scanId={state.scanId} onComplete={handleScanComplete} />}
-      {view === 'report' && state.report && <ReportView report={state.report} onReset={handleReset} />}
+      <div style={{ maxWidth: 960, margin: '0 auto', padding: '2rem 1rem' }}>
+        {route === 'home' && <ScanForm onStart={handleScanStart} />}
+        {route === 'scanning' && scanId && <ScanProgress scanId={scanId} onComplete={handleScanComplete} />}
+        {route === 'report' && report && <ReportView report={report} onReset={handleReset} />}
+        {route === 'login' && <LoginPage />}
+        {route === 'dashboard' && <DashboardPage />}
+        {route === 'pricing' && <PricingPage />}
+        {route === 'community' && <CommunityPage />}
+        {route === 'blog' && <BlogPage />}
+      </div>
     </div>
   );
 }
+
+const navLink: React.CSSProperties = { color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.9rem' };
 
 const root = document.getElementById('root')!;
 createRoot(root).render(<App />);
