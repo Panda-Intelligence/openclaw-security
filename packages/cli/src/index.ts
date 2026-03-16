@@ -1,7 +1,5 @@
 #!/usr/bin/env bun
 
-import type { ReportFormat, ScanConfig, ScanMode } from '@openclaw-security/scanner-core';
-import { formatReport, scan } from '@openclaw-security/scanner-core';
 import { runReportCommand } from './commands/report';
 import { runScanCommand } from './commands/scan';
 import { runUploadCommand } from './commands/upload';

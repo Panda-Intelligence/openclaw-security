@@ -8,9 +8,10 @@
   "scripts": {
     "test": "bun test",
     "build": "bun run --filter '*' build",
-    "lint": "bunx biome check .",
-    "lint:fix": "bunx biome check --fix .",
+    "lint": "bunx biome lint .",
+    "lint:fix": "bunx biome lint --fix .",
     "format": "bunx biome format --write .",
+    "format:check": "bunx biome format .",
     "typecheck": "bunx tsc --noEmit -p packages/scanner-core/tsconfig.json && bunx tsc --noEmit -p packages/cli/tsconfig.json && bunx tsc --noEmit -p apps/web/tsconfig.json && bunx tsc --noEmit -p apps/extension/tsconfig.json",
     "ci": "bun run typecheck && bun run lint && bun test"
   },

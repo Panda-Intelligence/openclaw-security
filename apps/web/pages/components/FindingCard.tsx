@@ -1,5 +1,5 @@
-import type { Severity } from '@openclaw-security/scanner-core';
-import React, { useState } from 'react';
+
+import { useState } from 'react';
 import type { FindingRecord } from '../lib/api';
 
 interface Props {

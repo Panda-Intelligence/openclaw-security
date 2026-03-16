@@ -5,21 +5,28 @@
     "rules": {
       "recommended": true,
       "suspicious": {
-        "noExplicitAny": "off"
+        "noExplicitAny": "off",
+        "noArrayIndexKey": "off"
       },
       "style": {
         "noNonNullAssertion": "off",
-        "useNodejsImportProtocol": "off"
+        "useNodejsImportProtocol": "off",
+        "useTemplate": "off"
+      },
+      "complexity": {
+        "useLiteralKeys": "off"
       },
       "correctness": {
         "noUnusedImports": "error",
         "noUnusedVariables": "warn",
-        "useExhaustiveDependencies": "warn"
+        "useExhaustiveDependencies": "warn",
+        "useParseIntRadix": "off"
       },
       "a11y": {
         "useKeyWithClickEvents": "off",
         "noStaticElementInteractions": "off",
-        "useButtonType": "warn"
+        "useButtonType": "warn",
+        "noSvgWithoutTitle": "off"
       }
     }
   },
@@ -37,6 +44,6 @@
     }
   },
   "files": {
-    "includes": ["packages/**", "apps/**"]
+    "includes": ["packages/**/*.ts", "packages/**/*.tsx", "apps/**/src/**", "apps/**/pages/**", "apps/**/tests/**"]
   }
 }

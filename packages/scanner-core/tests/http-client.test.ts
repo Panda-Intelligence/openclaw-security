@@ -1,6 +1,5 @@
-import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
+import { afterAll, describe, expect, test } from 'bun:test';
 import { createHttpClient } from '../src/http-client';
-import type { HttpClient } from '../src/types';
 
 const originalFetch = globalThis.fetch;
 

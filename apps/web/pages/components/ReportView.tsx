@@ -1,5 +1,4 @@
 import type { Severity } from '@openclaw-security/scanner-core';
-import React from 'react';
 import type { FindingRecord, ReportData } from '../lib/api';
 import { FindingCard } from './FindingCard';
 import { ScoreGauge } from './ScoreGauge';
@@ -26,6 +25,7 @@ export function ReportView({ report, onReset }: Props) {
       >
         <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>Security Report</h2>
         <button
+          type="button"
           onClick={onReset}
           style={{
             padding: '0.5rem 1rem',

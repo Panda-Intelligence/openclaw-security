@@ -1,6 +1,5 @@
 import { describe, expect, test } from 'bun:test';
 import cookieAudit from '../src/checks/passive/cookie-audit';
-import corsAudit from '../src/checks/passive/cors-audit';
 import errorDisclosure from '../src/checks/passive/error-disclosure';
 import hstsPreload from '../src/checks/passive/hsts-preload';
 // Import checks directly

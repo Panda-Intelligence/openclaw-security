@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test } from 'bun:test';
+import { describe, expect, test } from 'bun:test';
 import { auditAlgorithm, auditClaims, decodeJwt, getAlgorithm, isExpired } from '../src/jwt-analyzer';
 
 // Helper: create a base64url-encoded JWT

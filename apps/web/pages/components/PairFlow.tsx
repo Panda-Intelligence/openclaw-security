@@ -1,4 +1,4 @@
-import React from 'react';
+
 
 interface Props {
   jwt: string;
@@ -27,6 +27,7 @@ export function PairFlow({ jwt, onJwtChange, onClose }: Props) {
       >
         <h3 style={{ fontSize: '0.95rem', fontWeight: 600 }}>Deep Scan Authorization</h3>
         <button
+          type="button"
           onClick={onClose}
           style={{
             background: 'none',

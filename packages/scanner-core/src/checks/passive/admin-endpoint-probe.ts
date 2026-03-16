@@ -20,7 +20,7 @@ const check: CheckDefinition = {
 
     for (const ep of ADMIN_ENDPOINTS) {
       try {
-        let resp;
+        let resp: { status: number; body: string };
         if (ep.method === 'POST' && ep.body) {
           resp = await ctx.httpClient.post(`${base}${ep.path}`, ep.body, { timeout: 5000 });
         } else {

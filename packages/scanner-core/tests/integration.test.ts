@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, test } from 'bun:test';
 import { scan } from '../src/scanner';
-import type { HttpClient, HttpResponse, ScanConfig } from '../src/types';
+import type { HttpResponse, ScanConfig } from '../src/types';
 
 // Ensure all checks are registered
 import '../src/checks/index.js';

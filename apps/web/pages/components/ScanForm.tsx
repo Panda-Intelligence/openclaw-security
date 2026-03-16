@@ -44,8 +44,9 @@ export function ScanForm({ onStart }: Props) {
             padding: '1.5rem',
           }}
         >
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Target URL</label>
+          <label htmlFor="target-url" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Target URL</label>
           <input
+            id="target-url"
             type="text"
             value={url}
             onChange={(e) => setUrl(e.target.value)}

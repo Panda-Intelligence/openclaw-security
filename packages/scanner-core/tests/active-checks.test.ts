@@ -5,7 +5,7 @@ import jwtSecurity from '../src/checks/active/jwt-security';
 import memoryInjectionScan from '../src/checks/active/memory-injection-scan';
 import scheduleReview from '../src/checks/active/schedule-review';
 import skillAudit from '../src/checks/active/skill-audit';
-import type { CheckContext, HttpResponse } from '../src/types';
+import type { CheckContext, } from '../src/types';
 
 function makeJwt(header: object, payload: object): string {
   const b64url = (obj: object) => btoa(JSON.stringify(obj)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');

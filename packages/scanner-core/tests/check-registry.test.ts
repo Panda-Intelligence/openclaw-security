@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, test } from 'bun:test';
+import { describe, expect, test } from 'bun:test';
 import { getAllChecks, getCheck, getChecksByMode, registerCheck, topoSort } from '../src/check-registry';
 import type { CheckDefinition, CheckResult } from '../src/types';
 

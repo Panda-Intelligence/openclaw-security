@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { ReportData } from '../lib/api';
 import { getReport, getScan } from '../lib/api';
 
@@ -47,7 +47,7 @@ export function ScanProgress({ scanId, onComplete }: Props) {
     return () => {
       cancelled = true;
     };
-  }, [scanId]);
+  }, [scanId, onComplete]);
 
   const dots = '.'.repeat((elapsed % 3) + 1);
 

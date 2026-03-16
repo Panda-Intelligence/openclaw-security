@@ -86,7 +86,7 @@ function estimateCronFrequency(cron: string): number | null {
     const mins = minute
       .split(',')
       .map(Number)
-      .filter((n) => !isNaN(n));
+      .filter((n) => !Number.isNaN(n));
     if (mins.length >= 2) return Math.round(60 / mins.length);
   }
 
