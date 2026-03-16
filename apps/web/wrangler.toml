@@ -39,9 +39,9 @@ name = "openclaw-security-web"
 
 [env.production.vars]
 GOOGLE_CLIENT_ID = ""
-GOOGLE_REDIRECT_URI = "https://security.pandacat.ai/api/auth/google/callback"
+GOOGLE_REDIRECT_URI = "https://openclawsecurity.io/api/auth/google/callback"
 GITHUB_CLIENT_ID = ""
-GITHUB_REDIRECT_URI = "https://security.pandacat.ai/api/auth/github/callback"
+GITHUB_REDIRECT_URI = "https://openclawsecurity.io/api/auth/github/callback"
 STRIPE_PRICE_STARTER = ""
 
 [[env.production.d1_databases]]
@@ -64,9 +64,9 @@ name = "openclaw-security-web-staging"
 
 [env.staging.vars]
 GOOGLE_CLIENT_ID = ""
-GOOGLE_REDIRECT_URI = "https://staging.security.pandacat.ai/api/auth/google/callback"
+GOOGLE_REDIRECT_URI = "https://staging.openclawsecurity.io/api/auth/google/callback"
 GITHUB_CLIENT_ID = ""
-GITHUB_REDIRECT_URI = "https://staging.security.pandacat.ai/api/auth/github/callback"
+GITHUB_REDIRECT_URI = "https://staging.openclawsecurity.io/api/auth/github/callback"
 STRIPE_PRICE_STARTER = ""
 
 [[env.staging.d1_databases]]

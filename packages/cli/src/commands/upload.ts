@@ -27,7 +27,7 @@ export async function runUploadCommand(args: string[]): Promise<void> {
     mode: result.mode,
   };
 
-  const apiUrl = process.env['OPENCLAW_SECURITY_API'] ?? 'https://security.pandacat.ai';
+  const apiUrl = process.env['OPENCLAW_SECURITY_API'] ?? 'https://openclawsecurity.io';
 
   console.log(`\n  Uploading anonymized report to ${apiUrl}...`);
   console.log(`  Host: ${payload.targetHost}`);

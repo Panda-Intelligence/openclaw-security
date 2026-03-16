@@ -59,7 +59,7 @@ function Popup() {
       )}
 
       <a
-        href="https://security.pandacat.ai"
+        href="https://openclawsecurity.io"
         target="_blank"
         rel="noopener"
         style={{
