@@ -1,5 +1,9 @@
 # OpenClaw Security
 
+[![CI](https://github.com/openclaw/openclaw-security/actions/workflows/ci.yml/badge.svg)](https://github.com/openclaw/openclaw-security/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)](tsconfig.base.json)
+
 Security audit platform for [OpenClaw Cloud](https://github.com/openclaw) deployments. Think Lighthouse + Wappalyzer, but for AI agent infrastructure.
 
 Paste a URL, get a structured security report — no auth required for passive scans, JWT-paired deep scans for full config auditing.

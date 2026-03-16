@@ -1,5 +1,25 @@
 {
   "name": "openclaw-security",
+  "description": "Security audit platform for OpenClaw Cloud deployments",
+  "version": "0.1.0",
+  "license": "MIT",
+  "homepage": "https://github.com/openclaw/openclaw-security#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/openclaw/openclaw-security.git"
+  },
+  "bugs": {
+    "url": "https://github.com/openclaw/openclaw-security/issues"
+  },
+  "keywords": [
+    "security",
+    "audit",
+    "scanner",
+    "openclaw",
+    "cloudflare-workers",
+    "ai-agents",
+    "vulnerability-scanner"
+  ],
   "private": true,
   "workspaces": [
     "packages/*",
