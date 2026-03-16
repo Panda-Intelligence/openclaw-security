@@ -5,7 +5,7 @@
  *
  * Produces dist/ ready to be loaded as an unpacked Chrome extension.
  */
-import { mkdirSync, writeFileSync, readFileSync } from 'fs';
+import { mkdirSync, writeFileSync, readFileSync, cpSync } from 'fs';
 import { join } from 'path';
 
 const ROOT = import.meta.dir.replace('/scripts', '');
@@ -49,9 +49,8 @@ manifest.background.service_worker = 'service-worker.js';
 manifest.action.default_popup = 'popup.html';
 writeFileSync(join(DIST, 'manifest.json'), JSON.stringify(manifest, null, 2));
 
-// 5. Create placeholder icon SVGs (replace with real PNGs for production)
-// Chrome requires PNG but shows a default icon when files are missing
-console.warn('Note: Add real PNG icons to dist/icons/icon{16,48,128}.png');
+// 5. Copy icons
+cpSync(join(ROOT, 'icons'), join(DIST, 'icons'), { recursive: true });
 
 console.log('Extension built to dist/');
 console.log('Load unpacked from: apps/extension/dist/');

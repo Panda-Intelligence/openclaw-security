@@ -30,6 +30,11 @@ export function createHttpClient(defaults?: { timeout?: number; jwt?: string }):
         redirect: options?.followRedirects === false ? 'manual' : 'follow',
       });
 
+      // Track redirect if final URL differs from requested URL
+      if (resp.redirected && resp.url !== url) {
+        redirects.push(resp.url);
+      }
+
       const durationMs = Math.round(performance.now() - start);
       const respHeaders: Record<string, string> = {};
       resp.headers.forEach((v, k) => {

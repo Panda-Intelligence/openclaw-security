@@ -20,9 +20,9 @@ const COLORS = {
 function severityColor(s: Severity): string {
   switch (s) {
     case 'critical':
-      return COLORS.red;
+      return `${COLORS.bgRed}${COLORS.white}`;
     case 'high':
-      return `${COLORS.red}`;
+      return COLORS.red;
     case 'medium':
       return COLORS.yellow;
     case 'low':

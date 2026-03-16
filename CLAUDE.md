@@ -4,7 +4,7 @@
 
 ```bash
 bun install              # Install all workspace dependencies
-bun test                 # Run all tests (170 tests)
+bun test                 # Run all tests (191 tests)
 bun run typecheck        # Type check all 4 packages
 bun run lint             # Biome lint
 bun run ci               # Full CI: typecheck + lint + test

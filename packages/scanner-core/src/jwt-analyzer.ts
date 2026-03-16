@@ -47,7 +47,7 @@ export function getAlgorithm(header: JwtHeader): string {
   return header.alg ?? 'unknown';
 }
 
-const WEAK_ALGORITHMS = new Set(['none', 'HS256', 'RS256']);
+const WEAK_ALGORITHMS = new Set(['none', 'HS256']);
 const INSECURE_ALGORITHMS = new Set(['none']);
 
 export function auditAlgorithm(alg: string): { secure: boolean; reason: string } {
