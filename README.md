@@ -141,7 +141,7 @@ Open http://localhost:5173
 bun run dev              # Web UI dev server (port 5173)
 bun run dev:worker       # API + D1 (port 8787, wrangler)
 bun run scan <url>       # CLI scan shortcut
-bun test                 # Run all 121 tests
+bun test                 # Run all 170 tests
 bun run typecheck        # Type check all packages
 bun run lint             # Biome lint
 bun run ci               # Full CI pipeline

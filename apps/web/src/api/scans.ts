@@ -104,10 +104,17 @@ scanRoutes.get('/', async (c) => {
 // GET /api/scans/:id — get scan status
 scanRoutes.get('/:id', async (c) => {
   const id = c.req.param('id');
+  const userId = c.get('userId');
   const result = await c.env.DB.prepare(`SELECT * FROM scans WHERE id = ?`).bind(id).first();
 
   if (!result) {
     return c.json({ success: false, error: 'Scan not found' }, 404);
+  }
+
+  // Authorization: if scan belongs to a user, only that user may access it
+  const scanUserId = result['user_id'] as string | null;
+  if (scanUserId && scanUserId !== userId) {
+    return c.json({ success: false, error: 'Forbidden' }, 403);
   }
 
   return c.json({ success: true, data: result });

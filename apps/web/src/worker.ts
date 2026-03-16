@@ -61,12 +61,17 @@ app.route('/api/auth', authRoutes);
 app.route('/api/community', communityRoutes);
 
 // Auth middleware for protected /api/* routes
-const PUBLIC_PREFIXES = ['/api/billing/webhook', '/api/billing/plans'];
+const PUBLIC_PREFIXES = [
+  '/api/billing/webhook',
+  '/api/billing/plans',
+  '/api/auth/google',
+  '/api/auth/github',
+  '/api/community',
+];
 
 app.use('/api/*', async (c, next) => {
   const path = new URL(c.req.url).pathname;
   if (PUBLIC_PREFIXES.some((p) => path.startsWith(p))) return next();
-  if (path.startsWith('/api/auth/') || path.startsWith('/api/community')) return next();
 
   const user = await getAuthUser(c.req.raw, c.env);
   if (!user) {

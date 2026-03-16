@@ -12,12 +12,6 @@ export const PLAN_LIMITS: Record<PlanTier, {
   starter: { maxScansPerDayPerProject: 3, maxProjects: 10, price: 900 },
 };
 
-export const SUBSCRIPTION_TRANSITIONS: Record<SubscriptionStatus, SubscriptionStatus[]> = {
-  active: ['past_due', 'canceled'],
-  past_due: ['active', 'canceled'],
-  canceled: ['active'],
-};
-
 // ── User ──
 
 export interface User {
