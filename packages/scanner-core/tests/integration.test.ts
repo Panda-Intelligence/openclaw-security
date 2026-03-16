@@ -1,6 +1,6 @@
-import { describe, test, expect, beforeAll } from 'bun:test';
-import { scan } from '../src/scanner.js';
-import type { ScanConfig, HttpClient, HttpResponse } from '../src/types.js';
+import { beforeAll, describe, expect, test } from 'bun:test';
+import { scan } from '../src/scanner';
+import type { HttpClient, HttpResponse, ScanConfig } from '../src/types';
 
 // Ensure all checks are registered
 import '../src/checks/index.js';
@@ -20,7 +20,7 @@ function mockResponses(): Record<string, HttpResponse> {
       status: 200,
       headers: {
         'content-type': 'application/json',
-        'server': 'cloudflare',
+        server: 'cloudflare',
         'cf-ray': 'abc123',
       },
       body: JSON.stringify({ status: 'ok', version: '0.2.0', service: 'web' }),
@@ -32,7 +32,7 @@ function mockResponses(): Record<string, HttpResponse> {
       status: 200,
       headers: {
         'content-type': 'text/html',
-        'server': 'cloudflare',
+        server: 'cloudflare',
         'x-powered-by': 'Hono',
         // Missing: CSP, HSTS, X-Content-Type-Options, X-Frame-Options, Referrer-Policy
       },
@@ -124,7 +124,7 @@ function mockResponses(): Record<string, HttpResponse> {
       ...base,
       status: 302,
       headers: {
-        'location': 'https://accounts.google.com/o/oauth2/auth?client_id=xxx&redirect_uri=xxx&state=abc123&scope=email',
+        location: 'https://accounts.google.com/o/oauth2/auth?client_id=xxx&redirect_uri=xxx&state=abc123&scope=email',
       },
       body: '',
     },
@@ -161,7 +161,7 @@ function mockResponses(): Record<string, HttpResponse> {
       headers: {},
       body: '{"error":"Bad request"}',
     },
-    "GET:https://test.royal-lake.com/api/agents/<script>alert(1)</script>": {
+    'GET:https://test.royal-lake.com/api/agents/<script>alert(1)</script>': {
       ...base,
       status: 400,
       headers: {},
@@ -204,7 +204,7 @@ function mockResponses(): Record<string, HttpResponse> {
     'GET:http://test.royal-lake.com': {
       ...base,
       status: 301,
-      headers: { 'location': 'https://test.royal-lake.com' },
+      headers: { location: 'https://test.royal-lake.com' },
       body: '',
     },
 
@@ -310,7 +310,9 @@ describe('Scanner Integration — Passive Scan', () => {
     expect(result.score).toBeLessThan(100);
 
     // Should have severity counts
-    expect(result.severityCounts.critical + result.severityCounts.high + result.severityCounts.medium).toBeGreaterThan(0);
+    expect(result.severityCounts.critical + result.severityCounts.high + result.severityCounts.medium).toBeGreaterThan(
+      0,
+    );
   });
 
   test('score is penalty-based and never negative', async () => {
@@ -433,7 +435,14 @@ describe('Scanner Integration — Active Scan', () => {
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
         data: [
-          { id: 'a1', name: 'bot', slug: 'bot', status: 'running', model: 'gpt-4', systemPrompt: 'You are a helpful assistant' },
+          {
+            id: 'a1',
+            name: 'bot',
+            slug: 'bot',
+            status: 'running',
+            model: 'gpt-4',
+            systemPrompt: 'You are a helpful assistant',
+          },
           { id: 'a2', name: 'failed-bot', slug: 'failed', status: 'failed' },
         ],
       }),
@@ -476,9 +485,7 @@ describe('Scanner Integration — Active Scan', () => {
       status: 200,
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
-        data: [
-          { id: 'sc1', agentId: 'a1', cron: '* * * * *', prompt: 'Use password=abc123 to login', enabled: true },
-        ],
+        data: [{ id: 'sc1', agentId: 'a1', cron: '* * * * *', prompt: 'Use password=abc123 to login', enabled: true }],
       }),
       url: '',
       redirects: [],
@@ -490,9 +497,7 @@ describe('Scanner Integration — Active Scan', () => {
       status: 200,
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
-        data: [
-          { id: 'ch1', agentId: 'a1', type: 'telegram', status: 'pending', config: {} },
-        ],
+        data: [{ id: 'ch1', agentId: 'a1', type: 'telegram', status: 'pending', config: {} }],
       }),
       url: '',
       redirects: [],
@@ -503,8 +508,16 @@ describe('Scanner Integration — Active Scan', () => {
   });
 
   test('active scan includes both passive and active findings', async () => {
-    const jwt = btoa(JSON.stringify({ alg: 'HS256' })).replace(/=/g, '') + '.' +
-      btoa(JSON.stringify({ sub: 'user-1', exp: Math.floor(Date.now() / 1000) + 3600, iat: Math.floor(Date.now() / 1000) })).replace(/=/g, '') +
+    const jwt =
+      btoa(JSON.stringify({ alg: 'HS256' })).replace(/=/g, '') +
+      '.' +
+      btoa(
+        JSON.stringify({
+          sub: 'user-1',
+          exp: Math.floor(Date.now() / 1000) + 3600,
+          iat: Math.floor(Date.now() / 1000),
+        }),
+      ).replace(/=/g, '') +
       '.signature';
 
     const config: ScanConfig = {
@@ -528,11 +541,11 @@ describe('Scanner Integration — Active Scan', () => {
     expect(findingIds.has('cors-audit')).toBe(true);
 
     // Active findings
-    expect(findingIds.has('jwt-security')).toBe(true);        // HS256 is weak
-    expect(findingIds.has('agent-config-review')).toBe(true);  // failed agent + gpt-4
+    expect(findingIds.has('jwt-security')).toBe(true); // HS256 is weak
+    expect(findingIds.has('agent-config-review')).toBe(true); // failed agent + gpt-4
     expect(findingIds.has('memory-injection-scan')).toBe(true); // injection pattern
-    expect(findingIds.has('skill-audit')).toBe(true);          // HTTP source
-    expect(findingIds.has('schedule-review')).toBe(true);      // high-freq + password
+    expect(findingIds.has('skill-audit')).toBe(true); // HTTP source
+    expect(findingIds.has('schedule-review')).toBe(true); // high-freq + password
     expect(findingIds.has('channel-credential-status')).toBe(true); // pending + missing creds
 
     // Score should be quite low with all these issues

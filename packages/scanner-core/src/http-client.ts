@@ -1,4 +1,4 @@
-import type { HttpClient, HttpRequestOptions, HttpResponse } from './types.js';
+import type { HttpClient, HttpRequestOptions, HttpResponse } from './types';
 
 export function createHttpClient(defaults?: { timeout?: number; jwt?: string }): HttpClient {
   const defaultTimeout = defaults?.timeout ?? 15000;
@@ -32,7 +32,9 @@ export function createHttpClient(defaults?: { timeout?: number; jwt?: string }):
 
       const durationMs = Math.round(performance.now() - start);
       const respHeaders: Record<string, string> = {};
-      resp.headers.forEach((v, k) => { respHeaders[k.toLowerCase()] = v; });
+      resp.headers.forEach((v, k) => {
+        respHeaders[k.toLowerCase()] = v;
+      });
 
       const text = await resp.text();
 

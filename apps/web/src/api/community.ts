@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import type { Env } from '../worker.js';
+import type { Env } from '../worker';
 
 export const communityRoutes = new Hono<{ Bindings: Env }>();
 
@@ -50,7 +50,7 @@ communityRoutes.get('/', async (c) => {
 
   const data = result.results.map((r) => ({
     ...r,
-    severity_counts: JSON.parse((r.severity_counts as string) ?? '{}'),
+    severity_counts: JSON.parse((r['severity_counts'] as string) ?? '{}'),
   }));
 
   return c.json({ success: true, data });
@@ -65,8 +65,8 @@ communityRoutes.get('/stats', async (c) => {
   return c.json({
     success: true,
     data: {
-      totalReports: total?.count ?? 0,
-      averageScore: Math.round((total?.avg_score as number) ?? 0),
+      totalReports: total?.['count'] ?? 0,
+      averageScore: Math.round((total?.['avg_score'] as number) ?? 0),
     },
   });
 });

@@ -1,5 +1,5 @@
-import { describe, test, expect } from 'bun:test';
-import { handleScanQueue } from '../src/queue/scan-consumer.js';
+import { describe, expect, test } from 'bun:test';
+import { handleScanQueue } from '../src/queue/scan-consumer';
 
 // Mock D1 database
 function mockDb(scanRecord: Record<string, unknown> | null = null) {
@@ -50,8 +50,6 @@ describe('scan-consumer', () => {
     const sqls = db._statements.map((s) => s.sql);
     expect(sqls.some((s) => s.includes("status = 'running'"))).toBe(true);
     // Should have either completed or failed
-    expect(
-      sqls.some((s) => s.includes("status = 'completed'") || s.includes("status = 'failed'"))
-    ).toBe(true);
+    expect(sqls.some((s) => s.includes("status = 'completed'") || s.includes("status = 'failed'"))).toBe(true);
   });
 });

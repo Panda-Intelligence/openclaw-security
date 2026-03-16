@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { ScoreBadge } from './components/ScoreBadge.js';
-import { FindingSummary } from './components/FindingSummary.js';
-import type { DetectionResult } from '../background/detection.js';
+import type { DetectionResult } from '../background/detection';
+import { FindingSummary } from './components/FindingSummary';
+import { ScoreBadge } from './components/ScoreBadge';
 
 function Popup() {
   const [result, setResult] = useState<DetectionResult | null>(null);
@@ -43,9 +43,7 @@ function Popup() {
         <ScoreBadge score={result.score ?? 0} />
       </div>
 
-      {result.version && (
-        <p style={{ fontSize: 12, color: '#888', marginBottom: 8 }}>Version: {result.version}</p>
-      )}
+      {result.version && <p style={{ fontSize: 12, color: '#888', marginBottom: 8 }}>Version: {result.version}</p>}
 
       {result.findings.length > 0 ? (
         <div>
@@ -57,9 +55,7 @@ function Popup() {
           ))}
         </div>
       ) : (
-        <p style={{ color: '#22c55e', fontSize: 13, textAlign: 'center', padding: '12px 0' }}>
-          No issues detected
-        </p>
+        <p style={{ color: '#22c55e', fontSize: 13, textAlign: 'center', padding: '12px 0' }}>No issues detected</p>
       )}
 
       <a

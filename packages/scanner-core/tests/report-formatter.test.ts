@@ -1,6 +1,6 @@
-import { describe, test, expect } from 'bun:test';
-import { formatReport } from '../src/report-formatter.js';
-import type { ScanResult } from '../src/types.js';
+import { describe, expect, test } from 'bun:test';
+import { formatReport } from '../src/report-formatter';
+import type { ScanResult } from '../src/types';
 
 function makeScanResult(overrides?: Partial<ScanResult>): ScanResult {
   return {
@@ -54,7 +54,10 @@ describe('formatReport', () => {
     });
 
     test('handles empty findings', () => {
-      const output = formatReport(makeScanResult({ findings: [], severityCounts: { critical: 0, high: 0, medium: 0, low: 0, info: 0 } }), 'json');
+      const output = formatReport(
+        makeScanResult({ findings: [], severityCounts: { critical: 0, high: 0, medium: 0, low: 0, info: 0 } }),
+        'json',
+      );
       const parsed = JSON.parse(output);
       expect(parsed.findings).toHaveLength(0);
     });
@@ -106,14 +109,16 @@ describe('formatReport', () => {
 
     test('escapes HTML in findings', () => {
       const result = makeScanResult({
-        findings: [{
-          checkId: 'xss-test',
-          title: '<script>alert(1)</script>',
-          description: 'test',
-          severity: 'high',
-          evidence: '<img onerror=alert(1)>',
-          recommendation: 'fix',
-        }],
+        findings: [
+          {
+            checkId: 'xss-test',
+            title: '<script>alert(1)</script>',
+            description: 'test',
+            severity: 'high',
+            evidence: '<img onerror=alert(1)>',
+            recommendation: 'fix',
+          },
+        ],
       });
       const output = formatReport(result, 'html');
       expect(output).not.toContain('<script>alert(1)</script>');

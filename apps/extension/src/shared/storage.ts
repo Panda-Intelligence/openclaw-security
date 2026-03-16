@@ -1,4 +1,4 @@
-import type { DetectionResult } from '../background/detection.js';
+import type { DetectionResult } from '../background/detection';
 
 const CACHE_TTL = 60 * 60 * 1000; // 1 hour
 

@@ -1,6 +1,6 @@
-import { describe, test, expect, beforeAll, afterAll } from 'bun:test';
-import { createHttpClient } from '../src/http-client.js';
-import type { HttpClient } from '../src/types.js';
+import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
+import { createHttpClient } from '../src/http-client';
+import type { HttpClient } from '../src/types';
 
 const originalFetch = globalThis.fetch;
 
@@ -10,10 +10,11 @@ describe('createHttpClient', () => {
   });
 
   test('GET request returns structured response', async () => {
-    globalThis.fetch = async () => new Response('hello', {
-      status: 200,
-      headers: { 'X-Custom': 'test' },
-    });
+    globalThis.fetch = async () =>
+      new Response('hello', {
+        status: 200,
+        headers: { 'X-Custom': 'test' },
+      });
 
     const client = createHttpClient();
     const resp = await client.get('https://example.com');
@@ -79,7 +80,7 @@ describe('createHttpClient', () => {
 
     const client = createHttpClient();
     await client.get('https://example.com', {
-      headers: { 'X-Test': 'hello', 'Origin': 'https://foo.com' },
+      headers: { 'X-Test': 'hello', Origin: 'https://foo.com' },
     });
 
     expect(capturedHeaders['X-Test']).toBe('hello');
@@ -87,10 +88,11 @@ describe('createHttpClient', () => {
   });
 
   test('lowercases response headers', async () => {
-    globalThis.fetch = async () => new Response('', {
-      status: 200,
-      headers: { 'Content-Type': 'text/plain', 'X-RateLimit-Limit': '100' },
-    });
+    globalThis.fetch = async () =>
+      new Response('', {
+        status: 200,
+        headers: { 'Content-Type': 'text/plain', 'X-RateLimit-Limit': '100' },
+      });
 
     const client = createHttpClient();
     const resp = await client.get('https://example.com');
@@ -123,7 +125,7 @@ describe('createHttpClient', () => {
 
     globalThis.fetch = async (_url: any, init: any) => {
       capturedRedirect = init?.redirect;
-      return new Response('', { status: 302, headers: { 'Location': '/new' } });
+      return new Response('', { status: 302, headers: { Location: '/new' } });
     };
 
     const client = createHttpClient();

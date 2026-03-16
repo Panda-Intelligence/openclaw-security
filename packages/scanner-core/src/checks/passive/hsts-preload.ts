@@ -1,4 +1,4 @@
-import type { CheckDefinition, CheckResult, Finding } from '../../types.js';
+import type { CheckDefinition, CheckResult, Finding } from '../../types';
 
 const check: CheckDefinition = {
   id: 'hsts-preload',
@@ -26,7 +26,7 @@ const check: CheckDefinition = {
     }
 
     const maxAgeMatch = hsts.match(/max-age=(\d+)/);
-    const maxAge = maxAgeMatch ? parseInt(maxAgeMatch[1]) : 0;
+    const maxAge = maxAgeMatch?.[1] ? parseInt(maxAgeMatch[1]) : 0;
 
     if (maxAge < 31536000) {
       findings.push({

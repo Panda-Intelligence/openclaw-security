@@ -1,6 +1,6 @@
-import { describe, test, expect } from 'bun:test';
-import { computeScore, countSeverities, setCheckCategory } from '../src/scoring.js';
-import type { Finding, Severity } from '../src/types.js';
+import { describe, expect, test } from 'bun:test';
+import { computeScore, countSeverities, setCheckCategory } from '../src/scoring';
+import type { Finding, Severity } from '../src/types';
 
 function makeFinding(checkId: string, severity: Severity): Finding {
   return {
@@ -64,7 +64,7 @@ describe('computeScore', () => {
     setCheckCategory('multi-b', 'headers');
     const findings = [
       makeFinding('multi-a', 'critical'), // -20 in auth
-      makeFinding('multi-b', 'high'),     // -10 in headers
+      makeFinding('multi-b', 'high'), // -10 in headers
     ];
     expect(computeScore(findings)).toBe(70);
   });
@@ -77,11 +77,21 @@ describe('computeScore', () => {
     setCheckCategory('floor-e', 'data');
     // Stack up maximum deductions across multiple categories
     const findings = [
-      ...Array(3).fill(null).map(() => makeFinding('floor-a', 'critical')),
-      ...Array(4).fill(null).map(() => makeFinding('floor-b', 'high')),
-      ...Array(5).fill(null).map(() => makeFinding('floor-c', 'medium')),
-      ...Array(6).fill(null).map(() => makeFinding('floor-d', 'medium')),
-      ...Array(10).fill(null).map(() => makeFinding('floor-e', 'high')),
+      ...Array(3)
+        .fill(null)
+        .map(() => makeFinding('floor-a', 'critical')),
+      ...Array(4)
+        .fill(null)
+        .map(() => makeFinding('floor-b', 'high')),
+      ...Array(5)
+        .fill(null)
+        .map(() => makeFinding('floor-c', 'medium')),
+      ...Array(6)
+        .fill(null)
+        .map(() => makeFinding('floor-d', 'medium')),
+      ...Array(10)
+        .fill(null)
+        .map(() => makeFinding('floor-e', 'high')),
     ];
     const score = computeScore(findings);
     expect(score).toBeGreaterThanOrEqual(0);

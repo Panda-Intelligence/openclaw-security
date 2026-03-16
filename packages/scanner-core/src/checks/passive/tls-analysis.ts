@@ -1,4 +1,4 @@
-import type { CheckDefinition, CheckResult, Finding } from '../../types.js';
+import type { CheckDefinition, CheckResult, Finding } from '../../types';
 
 const check: CheckDefinition = {
   id: 'tls-analysis',
@@ -72,7 +72,9 @@ const check: CheckDefinition = {
           cweId: 'CWE-319',
         });
       }
-    } catch { /* HTTP may be unreachable — acceptable */ }
+    } catch {
+      /* HTTP may be unreachable — acceptable */
+    }
 
     return {
       checkId: 'tls-analysis',

@@ -1,5 +1,5 @@
-import { detectOpenClaw, type DetectionResult } from './detection.js';
-import { getCachedResult, setCachedResult } from '../shared/storage.js';
+import { getCachedResult, setCachedResult } from '../shared/storage';
+import { type DetectionResult, detectOpenClaw } from './detection';
 
 // Listen for tab updates
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
@@ -22,7 +22,9 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
       await setCachedResult(origin, result);
       updateBadge(tabId, result);
     }
-  } catch { /* ignore errors */ }
+  } catch {
+    /* ignore errors */
+  }
 });
 
 function updateBadge(tabId: number, result: DetectionResult): void {

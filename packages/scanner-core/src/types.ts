@@ -12,8 +12,8 @@ export interface ScanConfig {
   jwt?: string;
   checks?: string[];
   skipChecks?: string[];
-  timeout?: number;       // per-check ms, default 15000
-  concurrency?: number;   // max parallel, default 5
+  timeout?: number; // per-check ms, default 15000
+  concurrency?: number; // max parallel, default 5
 }
 
 // ── Findings ──

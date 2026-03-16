@@ -1,7 +1,7 @@
+import type { ReportFormat, ScanResult } from '@openclaw-security/scanner-core';
 import { formatReport } from '@openclaw-security/scanner-core';
-import type { ScanResult, ReportFormat } from '@openclaw-security/scanner-core';
 import { readFileSync } from 'fs';
-import { printTable } from '../output/table.js';
+import { printTable } from '../output/table';
 
 export async function runReportCommand(args: string[]): Promise<void> {
   const file = args[0];

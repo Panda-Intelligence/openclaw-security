@@ -1,4 +1,4 @@
-import type { CheckDefinition, CheckResult, Finding } from '../../types.js';
+import type { CheckDefinition, CheckResult, Finding } from '../../types';
 
 const check: CheckDefinition = {
   id: 'container-version',
@@ -31,9 +31,13 @@ const check: CheckDefinition = {
               recommendation: 'Deploy both workers together to ensure version consistency',
             });
           }
-        } catch { /* not JSON */ }
+        } catch {
+          /* not JSON */
+        }
       }
-    } catch { /* runtime endpoint not accessible */ }
+    } catch {
+      /* runtime endpoint not accessible */
+    }
 
     return {
       checkId: 'container-version',

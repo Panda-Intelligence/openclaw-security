@@ -1,4 +1,4 @@
-import type { CheckDefinition, ScanMode } from './types.js';
+import type { CheckDefinition, ScanMode } from './types';
 
 const registry = new Map<string, CheckDefinition>();
 

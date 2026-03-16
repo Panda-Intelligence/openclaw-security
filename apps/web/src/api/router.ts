@@ -1,8 +1,8 @@
 import { Hono } from 'hono';
-import type { Env } from '../worker.js';
-import { scanRoutes } from './scans.js';
-import { reportRoutes } from './reports.js';
-import { communityRoutes } from './community.js';
+import type { Env } from '../worker';
+import { communityRoutes } from './community';
+import { reportRoutes } from './reports';
+import { scanRoutes } from './scans';
 
 export const router = new Hono<{ Bindings: Env }>();
 

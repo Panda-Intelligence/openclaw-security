@@ -1,5 +1,5 @@
-import type { CheckDefinition, CheckResult, Finding } from '../../types.js';
-import { decodeJwt, isExpired, getAlgorithm, auditAlgorithm, auditClaims } from '../../jwt-analyzer.js';
+import { auditAlgorithm, auditClaims, decodeJwt, getAlgorithm, isExpired } from '../../jwt-analyzer';
+import type { CheckDefinition, CheckResult, Finding } from '../../types';
 
 const check: CheckDefinition = {
   id: 'jwt-security',

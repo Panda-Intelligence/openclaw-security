@@ -1,4 +1,4 @@
-import type { ScanResult, Finding, ReportFormat, Severity } from './types.js';
+import type { Finding, ReportFormat, ScanResult, Severity } from './types';
 
 export function formatReport(result: ScanResult, format: ReportFormat): string {
   switch (format) {

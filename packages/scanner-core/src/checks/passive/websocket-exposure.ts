@@ -1,4 +1,4 @@
-import type { CheckDefinition, CheckResult, Finding } from '../../types.js';
+import type { CheckDefinition, CheckResult, Finding } from '../../types';
 
 const check: CheckDefinition = {
   id: 'websocket-exposure',
@@ -17,8 +17,8 @@ const check: CheckDefinition = {
       try {
         const resp = await ctx.httpClient.get(`${base}${path}`, {
           headers: {
-            'Upgrade': 'websocket',
-            'Connection': 'Upgrade',
+            Upgrade: 'websocket',
+            Connection: 'Upgrade',
             'Sec-WebSocket-Version': '13',
             'Sec-WebSocket-Key': 'dGhlIHNhbXBsZSBub25jZQ==',
           },
@@ -46,7 +46,9 @@ const check: CheckDefinition = {
             recommendation: 'Ensure WebSocket authentication is enforced.',
           });
         }
-      } catch { /* timeout or error — endpoint doesn't exist */ }
+      } catch {
+        /* timeout or error — endpoint doesn't exist */
+      }
     }
 
     return {

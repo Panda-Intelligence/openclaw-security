@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import type { Env } from '../worker.js';
+import type { Env } from '../worker';
 
 export const reportRoutes = new Hono<{ Bindings: Env }>();
 
@@ -7,11 +7,7 @@ export const reportRoutes = new Hono<{ Bindings: Env }>();
 reportRoutes.get('/:scanId', async (c) => {
   const scanId = c.req.param('scanId');
 
-  const scan = await c.env.DB.prepare(
-    `SELECT * FROM scans WHERE id = ?`,
-  )
-    .bind(scanId)
-    .first();
+  const scan = await c.env.DB.prepare(`SELECT * FROM scans WHERE id = ?`).bind(scanId).first();
 
   if (!scan) {
     return c.json({ success: false, error: 'Scan not found' }, 404);
@@ -34,8 +30,8 @@ reportRoutes.get('/:scanId', async (c) => {
     success: true,
     data: {
       ...scan,
-      severity_counts: JSON.parse((scan.severity_counts as string) ?? '{}'),
-      platform_info: JSON.parse((scan.platform_info as string) ?? '{}'),
+      severity_counts: JSON.parse((scan['severity_counts'] as string) ?? '{}'),
+      platform_info: JSON.parse((scan['platform_info'] as string) ?? '{}'),
       findings: findings.results,
     },
   });

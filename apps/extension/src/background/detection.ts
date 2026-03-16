@@ -64,7 +64,7 @@ export async function detectOpenClaw(origin: string): Promise<DetectionResult | 
 
     // CORS check
     const corsResp = await fetch(`${origin}/api/billing/plans`, {
-      headers: { 'Origin': 'https://evil.example.com' },
+      headers: { Origin: 'https://evil.example.com' },
     });
     const acao = corsResp.headers.get('access-control-allow-origin');
     if (acao === '*' || acao === 'https://evil.example.com') {
@@ -78,7 +78,9 @@ export async function detectOpenClaw(origin: string): Promise<DetectionResult | 
       result.findings.push({ title: 'Admin endpoint unprotected', severity: 'critical' });
       deductions += 20;
     }
-  } catch { /* partial checks ok */ }
+  } catch {
+    /* partial checks ok */
+  }
 
   result.score = Math.max(0, 100 - deductions);
   return result;

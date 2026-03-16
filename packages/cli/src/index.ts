@@ -1,10 +1,10 @@
 #!/usr/bin/env bun
 
-import { scan, formatReport } from '@openclaw-security/scanner-core';
-import type { ScanConfig, ScanMode, ReportFormat } from '@openclaw-security/scanner-core';
-import { runScanCommand } from './commands/scan.js';
-import { runReportCommand } from './commands/report.js';
-import { runUploadCommand } from './commands/upload.js';
+import type { ReportFormat, ScanConfig, ScanMode } from '@openclaw-security/scanner-core';
+import { formatReport, scan } from '@openclaw-security/scanner-core';
+import { runReportCommand } from './commands/report';
+import { runScanCommand } from './commands/scan';
+import { runUploadCommand } from './commands/upload';
 
 const args = process.argv.slice(2);
 const command = args[0];

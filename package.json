@@ -8,10 +8,15 @@
   "scripts": {
     "test": "bun test",
     "build": "bun run --filter '*' build",
-    "lint": "bunx tsc --noEmit"
+    "lint": "bunx biome check .",
+    "lint:fix": "bunx biome check --fix .",
+    "format": "bunx biome format --write .",
+    "typecheck": "bunx tsc --noEmit -p packages/scanner-core/tsconfig.json && bunx tsc --noEmit -p packages/cli/tsconfig.json && bunx tsc --noEmit -p apps/web/tsconfig.json && bunx tsc --noEmit -p apps/extension/tsconfig.json",
+    "ci": "bun run typecheck && bun run lint && bun test"
   },
   "devDependencies": {
-    "typescript": "^5.7.0",
-    "@types/bun": "^1.2.0"
+    "@biomejs/biome": "^2.4.7",
+    "@types/bun": "^1.2.0",
+    "typescript": "^5.7.0"
   }
 }

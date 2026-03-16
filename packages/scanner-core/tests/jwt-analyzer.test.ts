@@ -1,10 +1,9 @@
-import { describe, test, expect, beforeEach } from 'bun:test';
-import { decodeJwt, isExpired, getAlgorithm, auditAlgorithm, auditClaims } from '../src/jwt-analyzer.js';
+import { beforeEach, describe, expect, test } from 'bun:test';
+import { auditAlgorithm, auditClaims, decodeJwt, getAlgorithm, isExpired } from '../src/jwt-analyzer';
 
 // Helper: create a base64url-encoded JWT
 function makeJwt(header: object, payload: object): string {
-  const b64url = (obj: object) =>
-    btoa(JSON.stringify(obj)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  const b64url = (obj: object) => btoa(JSON.stringify(obj)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   return `${b64url(header)}.${b64url(payload)}.fake-signature`;
 }
 

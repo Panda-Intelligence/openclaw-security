@@ -1,33 +1,24 @@
-import { scan } from '@openclaw-security/scanner-core';
 import type { ScanConfig, ScanResult } from '@openclaw-security/scanner-core';
-import type { Env } from '../worker.js';
+import { scan } from '@openclaw-security/scanner-core';
+import type { Env } from '../worker';
 
-export async function handleScanQueue(
-  message: { scanId: string; jwt?: string },
-  env: Env,
-): Promise<void> {
+export async function handleScanQueue(message: { scanId: string; jwt?: string }, env: Env): Promise<void> {
   const { scanId, jwt } = message;
 
   // Get scan record
-  const scanRecord = await env.DB.prepare(
-    `SELECT * FROM scans WHERE id = ?`,
-  )
-    .bind(scanId)
-    .first();
+  const scanRecord = await env.DB.prepare(`SELECT * FROM scans WHERE id = ?`).bind(scanId).first();
 
   if (!scanRecord) return;
 
   // Update status to running
-  await env.DB.prepare(
-    `UPDATE scans SET status = 'running', started_at = datetime('now') WHERE id = ?`,
-  )
+  await env.DB.prepare(`UPDATE scans SET status = 'running', started_at = datetime('now') WHERE id = ?`)
     .bind(scanId)
     .run();
 
   try {
     const config: ScanConfig = {
-      targetUrl: scanRecord.target_url as string,
-      mode: (scanRecord.mode as string) === 'active' ? 'active' : 'passive',
+      targetUrl: scanRecord['target_url'] as string,
+      mode: (scanRecord['mode'] as string) === 'active' ? 'active' : 'passive',
       jwt,
       timeout: 15000,
       concurrency: 5,

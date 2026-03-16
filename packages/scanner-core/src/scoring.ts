@@ -1,4 +1,4 @@
-import type { Finding, Severity, CheckCategory } from './types.js';
+import type { CheckCategory, Finding, Severity } from './types';
 
 const PENALTY: Record<Severity, number> = {
   critical: 20,

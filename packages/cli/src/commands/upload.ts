@@ -27,7 +27,7 @@ export async function runUploadCommand(args: string[]): Promise<void> {
     mode: result.mode,
   };
 
-  const apiUrl = process.env.OPENCLAW_SECURITY_API ?? 'https://security.openclaw.com';
+  const apiUrl = process.env['OPENCLAW_SECURITY_API'] ?? 'https://security.openclaw.com';
 
   console.log(`\n  Uploading anonymized report to ${apiUrl}...`);
   console.log(`  Host: ${payload.targetHost}`);
@@ -42,7 +42,7 @@ export async function runUploadCommand(args: string[]): Promise<void> {
     });
 
     if (resp.ok) {
-      const data = await resp.json() as { data?: { id: string } };
+      const data = (await resp.json()) as { data?: { id: string } };
       console.log(`  Uploaded successfully! Report ID: ${data.data?.id ?? 'N/A'}\n`);
     } else {
       console.error(`  Upload failed: ${resp.status} ${resp.statusText}\n`);

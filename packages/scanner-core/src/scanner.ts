@@ -1,16 +1,16 @@
+import { getAllChecks, getChecksByMode } from './check-registry';
+import { runChecks } from './check-runner';
+import { createHttpClient } from './http-client';
+import { computeScore, countSeverities } from './scoring';
 import type {
-  ScanConfig,
-  ScanResult,
-  PlatformInfo,
   ActiveScanData,
   CheckContext,
   CheckDefinition,
   Finding,
-} from './types.js';
-import { createHttpClient } from './http-client.js';
-import { getAllChecks, getChecksByMode } from './check-registry.js';
-import { runChecks } from './check-runner.js';
-import { computeScore, countSeverities } from './scoring.js';
+  PlatformInfo,
+  ScanConfig,
+  ScanResult,
+} from './types';
 
 export async function scan(config: ScanConfig): Promise<ScanResult> {
   const id = crypto.randomUUID();
@@ -49,7 +49,7 @@ export async function scan(config: ScanConfig): Promise<ScanResult> {
   }
 
   // Step 3: Collect applicable checks
-  let checks = getApplicableChecks(config);
+  const checks = getApplicableChecks(config);
 
   // Build context
   const ctx: CheckContext = { config: { ...config, targetUrl: url }, httpClient, platformInfo };
@@ -115,10 +115,7 @@ function getApplicableChecks(config: ScanConfig): CheckDefinition[] {
   return checks;
 }
 
-async function fingerprint(
-  httpClient: ReturnType<typeof createHttpClient>,
-  baseUrl: string,
-): Promise<PlatformInfo> {
+async function fingerprint(httpClient: ReturnType<typeof createHttpClient>, baseUrl: string): Promise<PlatformInfo> {
   const info: PlatformInfo = {
     version: null,
     service: null,
@@ -137,7 +134,9 @@ async function fingerprint(
           info.version = data.version ?? null;
           info.service = data.service ?? null;
         }
-      } catch { /* not JSON */ }
+      } catch {
+        /* not JSON */
+      }
     }
 
     // Check server header for Cloudflare
@@ -147,7 +146,9 @@ async function fingerprint(
     if (resp.headers['cf-ray']) {
       info.detectedProviders.push('cloudflare-cdn');
     }
-  } catch { /* unreachable or timeout */ }
+  } catch {
+    /* unreachable or timeout */
+  }
 
   return info;
 }
@@ -157,15 +158,14 @@ async function fetchActiveData(
   baseUrl: string,
 ): Promise<ActiveScanData | null> {
   try {
-    const [meResp, agentsResp, memoriesResp, skillsResp, schedulesResp, channelsResp] =
-      await Promise.all([
-        httpClient.get(`${baseUrl}/api/auth/me`),
-        httpClient.get(`${baseUrl}/api/agents`),
-        httpClient.get(`${baseUrl}/api/memories`),
-        httpClient.get(`${baseUrl}/api/skills`),
-        httpClient.get(`${baseUrl}/api/schedules`),
-        httpClient.get(`${baseUrl}/api/channels`),
-      ]);
+    const [meResp, agentsResp, memoriesResp, skillsResp, schedulesResp, channelsResp] = await Promise.all([
+      httpClient.get(`${baseUrl}/api/auth/me`),
+      httpClient.get(`${baseUrl}/api/agents`),
+      httpClient.get(`${baseUrl}/api/memories`),
+      httpClient.get(`${baseUrl}/api/skills`),
+      httpClient.get(`${baseUrl}/api/schedules`),
+      httpClient.get(`${baseUrl}/api/channels`),
+    ]);
 
     if (meResp.status !== 200) return null;
 

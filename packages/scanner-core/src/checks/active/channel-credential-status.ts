@@ -1,4 +1,4 @@
-import type { CheckDefinition, CheckResult, Finding } from '../../types.js';
+import type { CheckDefinition, CheckResult, Finding } from '../../types';
 
 const REQUIRED_FIELDS: Record<string, string[]> = {
   telegram: ['botToken'],

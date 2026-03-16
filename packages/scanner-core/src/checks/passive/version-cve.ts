@@ -1,5 +1,5 @@
-import type { CheckDefinition, CheckResult, Finding } from '../../types.js';
-import { getCvesForVersion, isEol, isOutdated, getLatestVersion } from '../../version-db.js';
+import type { CheckDefinition, CheckResult, Finding } from '../../types';
+import { getCvesForVersion, getLatestVersion, isEol, isOutdated } from '../../version-db';
 
 const check: CheckDefinition = {
   id: 'version-cve',
@@ -24,9 +24,7 @@ const check: CheckDefinition = {
         description: cve.description,
         severity: cve.severity,
         evidence: `Version ${version} is affected by ${cve.id}`,
-        recommendation: cve.fixedIn
-          ? `Upgrade to version ${cve.fixedIn} or later`
-          : 'Apply vendor patches',
+        recommendation: cve.fixedIn ? `Upgrade to version ${cve.fixedIn} or later` : 'Apply vendor patches',
         cweId: 'CWE-1035',
       });
     }

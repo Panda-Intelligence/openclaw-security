@@ -1,11 +1,7 @@
-import type { CheckDefinition, CheckResult, Finding } from '../../types.js';
+import type { CheckDefinition, CheckResult, Finding } from '../../types';
 
 const DANGEROUS_MODELS = ['gpt-4', 'claude-3-opus'];
-const DEFAULT_PROMPT_PATTERNS = [
-  /you are a helpful assistant/i,
-  /you are an ai/i,
-  /default system prompt/i,
-];
+const DEFAULT_PROMPT_PATTERNS = [/you are a helpful assistant/i, /you are an ai/i, /default system prompt/i];
 
 const check: CheckDefinition = {
   id: 'agent-config-review',
@@ -53,7 +49,8 @@ const check: CheckDefinition = {
             findings.push({
               checkId: 'agent-config-review',
               title: `Default system prompt detected: ${agent.name}`,
-              description: 'Agent appears to use a default or minimal system prompt, which may lack safety instructions',
+              description:
+                'Agent appears to use a default or minimal system prompt, which may lack safety instructions',
               severity: 'low',
               evidence: `System prompt matches pattern: ${pattern.source}`,
               recommendation: 'Configure a specific system prompt with appropriate safety guardrails',

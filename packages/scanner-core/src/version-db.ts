@@ -67,7 +67,8 @@ export function isEol(version: string): boolean {
 }
 
 export function getLatestVersion(): string {
-  return VERSION_DATABASE[VERSION_DATABASE.length - 1].version;
+  const last = VERSION_DATABASE[VERSION_DATABASE.length - 1];
+  return last?.version ?? '0.0.0';
 }
 
 export function isOutdated(version: string): boolean {

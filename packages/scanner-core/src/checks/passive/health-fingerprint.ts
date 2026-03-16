@@ -1,4 +1,4 @@
-import type { CheckDefinition, CheckResult, Finding } from '../../types.js';
+import type { CheckDefinition, CheckResult, Finding } from '../../types';
 
 const check: CheckDefinition = {
   id: 'health-fingerprint',
@@ -37,9 +37,13 @@ const check: CheckDefinition = {
               });
             }
           }
-        } catch { /* not JSON, not OpenClaw */ }
+        } catch {
+          /* not JSON, not OpenClaw */
+        }
       }
-    } catch { /* unreachable */ }
+    } catch {
+      /* unreachable */
+    }
 
     return {
       checkId: 'health-fingerprint',

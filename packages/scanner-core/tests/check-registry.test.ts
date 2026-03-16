@@ -1,6 +1,6 @@
-import { describe, test, expect, beforeEach } from 'bun:test';
-import { registerCheck, getCheck, getAllChecks, getChecksByMode, topoSort } from '../src/check-registry.js';
-import type { CheckDefinition, CheckResult } from '../src/types.js';
+import { beforeEach, describe, expect, test } from 'bun:test';
+import { getAllChecks, getCheck, getChecksByMode, registerCheck, topoSort } from '../src/check-registry';
+import type { CheckDefinition, CheckResult } from '../src/types';
 
 // We need a fresh registry for some tests, but registry is module-level.
 // Tests that need isolation use unique IDs.
@@ -55,20 +55,13 @@ describe('check-registry', () => {
 
 describe('topoSort', () => {
   test('sorts independent checks in registration order', () => {
-    const checks = [
-      makeCheck({ id: 'topo-a' }),
-      makeCheck({ id: 'topo-b' }),
-      makeCheck({ id: 'topo-c' }),
-    ];
+    const checks = [makeCheck({ id: 'topo-a' }), makeCheck({ id: 'topo-b' }), makeCheck({ id: 'topo-c' })];
     const sorted = topoSort(checks);
     expect(sorted.map((c) => c.id)).toEqual(['topo-a', 'topo-b', 'topo-c']);
   });
 
   test('respects dependencies', () => {
-    const checks = [
-      makeCheck({ id: 'topo-dep-b', dependsOn: ['topo-dep-a'] }),
-      makeCheck({ id: 'topo-dep-a' }),
-    ];
+    const checks = [makeCheck({ id: 'topo-dep-b', dependsOn: ['topo-dep-a'] }), makeCheck({ id: 'topo-dep-a' })];
     const sorted = topoSort(checks);
     const ids = sorted.map((c) => c.id);
     expect(ids.indexOf('topo-dep-a')).toBeLessThan(ids.indexOf('topo-dep-b'));
@@ -95,9 +88,7 @@ describe('topoSort', () => {
   });
 
   test('ignores unknown dependencies', () => {
-    const checks = [
-      makeCheck({ id: 'unknown-dep', dependsOn: ['nonexistent'] }),
-    ];
+    const checks = [makeCheck({ id: 'unknown-dep', dependsOn: ['nonexistent'] })];
     const sorted = topoSort(checks);
     expect(sorted).toHaveLength(1);
   });

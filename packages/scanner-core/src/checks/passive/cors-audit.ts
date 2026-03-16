@@ -1,4 +1,4 @@
-import type { CheckDefinition, CheckResult, Finding } from '../../types.js';
+import type { CheckDefinition, CheckResult, Finding } from '../../types';
 
 const check: CheckDefinition = {
   id: 'cors-audit',
@@ -12,7 +12,7 @@ const check: CheckDefinition = {
 
     // Test 1: Wildcard origin
     const resp1 = await ctx.httpClient.get(`${base}/api/billing/plans`, {
-      headers: { 'Origin': 'https://evil.example.com' },
+      headers: { Origin: 'https://evil.example.com' },
     });
 
     const acao = resp1.headers['access-control-allow-origin'];
@@ -60,7 +60,7 @@ const check: CheckDefinition = {
     try {
       const preflight = await ctx.httpClient.options(`${base}/api/agents`, {
         headers: {
-          'Origin': 'https://evil.example.com',
+          Origin: 'https://evil.example.com',
           'Access-Control-Request-Method': 'DELETE',
           'Access-Control-Request-Headers': 'Authorization',
         },
@@ -78,7 +78,9 @@ const check: CheckDefinition = {
           cweId: 'CWE-942',
         });
       }
-    } catch { /* preflight failed — acceptable */ }
+    } catch {
+      /* preflight failed — acceptable */
+    }
 
     return {
       checkId: 'cors-audit',

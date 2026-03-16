@@ -1,5 +1,5 @@
-import { describe, test, expect } from 'bun:test';
-import { lookupVersion, getCvesForVersion, isEol, isOutdated, getLatestVersion } from '../src/version-db.js';
+import { describe, expect, test } from 'bun:test';
+import { getCvesForVersion, getLatestVersion, isEol, isOutdated, lookupVersion } from '../src/version-db';
 
 describe('version-db', () => {
   test('getLatestVersion returns a version string', () => {

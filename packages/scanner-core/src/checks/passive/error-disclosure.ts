@@ -1,21 +1,21 @@
-import type { CheckDefinition, CheckResult, Finding } from '../../types.js';
+import type { CheckDefinition, CheckResult, Finding } from '../../types';
 
 const MALFORMED_REQUESTS = [
   { path: '/api/agents/../../etc/passwd', description: 'Path traversal attempt' },
   { path: '/api/agents/%00', description: 'Null byte injection' },
-  { path: "/api/agents/<script>alert(1)</script>", description: 'XSS in path' },
+  { path: '/api/agents/<script>alert(1)</script>', description: 'XSS in path' },
   { path: '/api/agents/undefined', description: 'Undefined resource ID' },
   { path: '/api/nonexistent', description: 'Non-existent route' },
 ];
 
 const STACK_TRACE_PATTERNS = [
-  /at\s+\w+\s+\(.*:\d+:\d+\)/i,    // "at Function (file.js:10:5)"
-  /Error:.*\n\s+at\s/,               // Multi-line stack trace
-  /node_modules\//,                    // Node module paths
-  /src\/.*\.ts:\d+/,                  // TypeScript source paths
-  /\.wrangler\//,                     // Wrangler internals
-  /Traceback \(most recent/,          // Python traces
-  /panic:.*goroutine/,                // Go panics
+  /at\s+\w+\s+\(.*:\d+:\d+\)/i, // "at Function (file.js:10:5)"
+  /Error:.*\n\s+at\s/, // Multi-line stack trace
+  /node_modules\//, // Node module paths
+  /src\/.*\.ts:\d+/, // TypeScript source paths
+  /\.wrangler\//, // Wrangler internals
+  /Traceback \(most recent/, // Python traces
+  /panic:.*goroutine/, // Go panics
 ];
 
 const SENSITIVE_PATTERNS = [
@@ -48,7 +48,8 @@ const check: CheckDefinition = {
               findings.push({
                 checkId: 'error-disclosure',
                 title: `Stack trace in error response (${req.description})`,
-                description: 'Error response contains stack trace information that reveals internal implementation details',
+                description:
+                  'Error response contains stack trace information that reveals internal implementation details',
                 severity: 'medium',
                 evidence: resp.body.substring(0, 300),
                 recommendation: 'Return generic error messages in production. Log details server-side only.',
@@ -74,7 +75,9 @@ const check: CheckDefinition = {
             }
           }
         }
-      } catch { /* timeout */ }
+      } catch {
+        /* timeout */
+      }
     }
 
     return {

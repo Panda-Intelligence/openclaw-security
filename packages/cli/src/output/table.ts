@@ -19,11 +19,16 @@ const COLORS = {
 
 function severityColor(s: Severity): string {
   switch (s) {
-    case 'critical': return COLORS.red;
-    case 'high': return `${COLORS.red}`;
-    case 'medium': return COLORS.yellow;
-    case 'low': return COLORS.blue;
-    case 'info': return COLORS.gray;
+    case 'critical':
+      return COLORS.red;
+    case 'high':
+      return `${COLORS.red}`;
+    case 'medium':
+      return COLORS.yellow;
+    case 'low':
+      return COLORS.blue;
+    case 'info':
+      return COLORS.gray;
   }
 }
 
@@ -91,10 +96,13 @@ export function printTable(result: ScanResult): void {
 
   for (const cr of result.checkResults) {
     const statusIcon =
-      cr.status === 'pass' ? `${c.green}✓${c.reset}` :
-      cr.status === 'fail' ? `${c.red}✗${c.reset}` :
-      cr.status === 'error' ? `${c.yellow}!${c.reset}` :
-      `${c.gray}-${c.reset}`;
+      cr.status === 'pass'
+        ? `${c.green}✓${c.reset}`
+        : cr.status === 'fail'
+          ? `${c.red}✗${c.reset}`
+          : cr.status === 'error'
+            ? `${c.yellow}!${c.reset}`
+            : `${c.gray}-${c.reset}`;
     const timing = cr.durationMs > 0 ? `${c.dim}${cr.durationMs}ms${c.reset}` : '';
     console.log(`  ${statusIcon} ${cr.checkId.padEnd(30)} ${timing}`);
   }

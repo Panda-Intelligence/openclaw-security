@@ -1,4 +1,4 @@
-import type { CheckDefinition, CheckResult, Finding } from '../../types.js';
+import type { CheckDefinition, CheckResult, Finding } from '../../types';
 
 const check: CheckDefinition = {
   id: 'oauth-enumeration',
@@ -42,7 +42,9 @@ const check: CheckDefinition = {
             });
           }
         }
-      } catch { /* timeout or error */ }
+      } catch {
+        /* timeout or error */
+      }
     }
 
     return {

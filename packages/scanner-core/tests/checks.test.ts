@@ -1,12 +1,11 @@
-import { describe, test, expect } from 'bun:test';
-import type { CheckContext, HttpResponse } from '../src/types.js';
-
+import { describe, expect, test } from 'bun:test';
+import cookieAudit from '../src/checks/passive/cookie-audit';
+import corsAudit from '../src/checks/passive/cors-audit';
+import errorDisclosure from '../src/checks/passive/error-disclosure';
+import hstsPreload from '../src/checks/passive/hsts-preload';
 // Import checks directly
-import securityHeaders from '../src/checks/passive/security-headers.js';
-import corsAudit from '../src/checks/passive/cors-audit.js';
-import hstsPreload from '../src/checks/passive/hsts-preload.js';
-import cookieAudit from '../src/checks/passive/cookie-audit.js';
-import errorDisclosure from '../src/checks/passive/error-disclosure.js';
+import securityHeaders from '../src/checks/passive/security-headers';
+import type { CheckContext, HttpResponse } from '../src/types';
 
 function makeResponse(overrides?: Partial<HttpResponse>): HttpResponse {
   return {
@@ -47,30 +46,34 @@ describe('security-headers check', () => {
   });
 
   test('passes with all headers present', async () => {
-    const ctx = makeCtx(makeResponse({
-      headers: {
-        'strict-transport-security': 'max-age=31536000; includeSubDomains; preload',
-        'content-security-policy': "default-src 'self'",
-        'x-content-type-options': 'nosniff',
-        'x-frame-options': 'DENY',
-        'referrer-policy': 'strict-origin-when-cross-origin',
-      },
-    }));
+    const ctx = makeCtx(
+      makeResponse({
+        headers: {
+          'strict-transport-security': 'max-age=31536000; includeSubDomains; preload',
+          'content-security-policy': "default-src 'self'",
+          'x-content-type-options': 'nosniff',
+          'x-frame-options': 'DENY',
+          'referrer-policy': 'strict-origin-when-cross-origin',
+        },
+      }),
+    );
     const result = await securityHeaders.run(ctx);
     expect(result.findings.filter((f) => f.severity === 'high')).toHaveLength(0);
   });
 
   test('detects x-powered-by leakage', async () => {
-    const ctx = makeCtx(makeResponse({
-      headers: {
-        'strict-transport-security': 'max-age=31536000',
-        'content-security-policy': "default-src 'self'",
-        'x-content-type-options': 'nosniff',
-        'x-frame-options': 'DENY',
-        'referrer-policy': 'strict-origin-when-cross-origin',
-        'x-powered-by': 'Express',
-      },
-    }));
+    const ctx = makeCtx(
+      makeResponse({
+        headers: {
+          'strict-transport-security': 'max-age=31536000',
+          'content-security-policy': "default-src 'self'",
+          'x-content-type-options': 'nosniff',
+          'x-frame-options': 'DENY',
+          'referrer-policy': 'strict-origin-when-cross-origin',
+          'x-powered-by': 'Express',
+        },
+      }),
+    );
     const result = await securityHeaders.run(ctx);
     expect(result.findings.some((f) => f.title.includes('x-powered-by'))).toBe(true);
   });
@@ -85,25 +88,31 @@ describe('hsts-preload check', () => {
   });
 
   test('reports short max-age', async () => {
-    const ctx = makeCtx(makeResponse({
-      headers: { 'strict-transport-security': 'max-age=86400' },
-    }));
+    const ctx = makeCtx(
+      makeResponse({
+        headers: { 'strict-transport-security': 'max-age=86400' },
+      }),
+    );
     const result = await hstsPreload.run(ctx);
     expect(result.findings.some((f) => f.title.includes('max-age'))).toBe(true);
   });
 
   test('reports missing includeSubDomains', async () => {
-    const ctx = makeCtx(makeResponse({
-      headers: { 'strict-transport-security': 'max-age=31536000; preload' },
-    }));
+    const ctx = makeCtx(
+      makeResponse({
+        headers: { 'strict-transport-security': 'max-age=31536000; preload' },
+      }),
+    );
     const result = await hstsPreload.run(ctx);
     expect(result.findings.some((f) => f.title.includes('includeSubDomains'))).toBe(true);
   });
 
   test('passes with complete HSTS', async () => {
-    const ctx = makeCtx(makeResponse({
-      headers: { 'strict-transport-security': 'max-age=31536000; includeSubDomains; preload' },
-    }));
+    const ctx = makeCtx(
+      makeResponse({
+        headers: { 'strict-transport-security': 'max-age=31536000; includeSubDomains; preload' },
+      }),
+    );
     const result = await hstsPreload.run(ctx);
     expect(result.status).toBe('pass');
   });
@@ -118,9 +127,11 @@ describe('cookie-audit check', () => {
   });
 
   test('reports insecure cookies', async () => {
-    const ctx = makeCtx(makeResponse({
-      headers: { 'set-cookie': 'session=abc123; Path=/' },
-    }));
+    const ctx = makeCtx(
+      makeResponse({
+        headers: { 'set-cookie': 'session=abc123; Path=/' },
+      }),
+    );
     const result = await cookieAudit.run(ctx);
     expect(result.status).toBe('fail');
     expect(result.findings.some((f) => f.title.includes('Secure'))).toBe(true);
@@ -129,9 +140,11 @@ describe('cookie-audit check', () => {
   });
 
   test('passes with secure cookies', async () => {
-    const ctx = makeCtx(makeResponse({
-      headers: { 'set-cookie': 'session=abc123; Secure; HttpOnly; SameSite=Strict; Path=/' },
-    }));
+    const ctx = makeCtx(
+      makeResponse({
+        headers: { 'set-cookie': 'session=abc123; Secure; HttpOnly; SameSite=Strict; Path=/' },
+      }),
+    );
     const result = await cookieAudit.run(ctx);
     expect(result.status).toBe('pass');
   });
@@ -139,19 +152,23 @@ describe('cookie-audit check', () => {
 
 describe('error-disclosure check', () => {
   test('detects stack traces in error response', async () => {
-    const ctx = makeCtx(makeResponse({
-      status: 500,
-      body: 'Error: Something went wrong\n  at Function (/app/src/handler.ts:42:10)\n  at Layer.handle',
-    }));
+    const ctx = makeCtx(
+      makeResponse({
+        status: 500,
+        body: 'Error: Something went wrong\n  at Function (/app/src/handler.ts:42:10)\n  at Layer.handle',
+      }),
+    );
     const result = await errorDisclosure.run(ctx);
     expect(result.findings.some((f) => f.title.includes('Stack trace'))).toBe(true);
   });
 
   test('passes with clean error responses', async () => {
-    const ctx = makeCtx(makeResponse({
-      status: 404,
-      body: '{"error":"Not found"}',
-    }));
+    const ctx = makeCtx(
+      makeResponse({
+        status: 404,
+        body: '{"error":"Not found"}',
+      }),
+    );
     const result = await errorDisclosure.run(ctx);
     expect(result.status).toBe('pass');
   });

@@ -1,6 +1,6 @@
-import { describe, test, expect } from 'bun:test';
-import { runChecks } from '../src/check-runner.js';
-import type { CheckDefinition, CheckContext, CheckResult } from '../src/types.js';
+import { describe, expect, test } from 'bun:test';
+import { runChecks } from '../src/check-runner';
+import type { CheckContext, CheckDefinition, CheckResult } from '../src/types';
 
 function makeCtx(): CheckContext {
   return {
@@ -43,11 +43,17 @@ describe('runChecks', () => {
     const checks: CheckDefinition[] = [
       {
         ...makeCheck('dep-b', { dependsOn: ['dep-a'] }),
-        run: async () => { order.push('dep-b'); return { checkId: 'dep-b', status: 'pass', findings: [], durationMs: 0 }; },
+        run: async () => {
+          order.push('dep-b');
+          return { checkId: 'dep-b', status: 'pass', findings: [], durationMs: 0 };
+        },
       },
       {
         ...makeCheck('dep-a'),
-        run: async () => { order.push('dep-a'); return { checkId: 'dep-a', status: 'pass', findings: [], durationMs: 0 }; },
+        run: async () => {
+          order.push('dep-a');
+          return { checkId: 'dep-a', status: 'pass', findings: [], durationMs: 0 };
+        },
       },
     ];
     await runChecks(checks, makeCtx());

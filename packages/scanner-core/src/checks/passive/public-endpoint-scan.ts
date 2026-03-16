@@ -1,4 +1,4 @@
-import type { CheckDefinition, CheckResult, Finding } from '../../types.js';
+import type { CheckDefinition, CheckResult, Finding } from '../../types';
 
 const PUBLIC_ENDPOINTS = [
   { path: '/api/billing/plans', expectPublic: true, description: 'Billing plans (expected public)' },

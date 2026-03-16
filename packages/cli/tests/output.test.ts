@@ -1,6 +1,6 @@
-import { describe, test, expect } from 'bun:test';
-import { printTable } from '../src/output/table.js';
+import { describe, expect, test } from 'bun:test';
 import type { ScanResult } from '@openclaw-security/scanner-core';
+import { printTable } from '../src/output/table';
 
 function makeScanResult(overrides?: Partial<ScanResult>): ScanResult {
   return {
@@ -70,11 +70,13 @@ describe('CLI output', () => {
     const originalLog = console.log;
     console.log = (...args) => logs.push(args.join(' '));
 
-    printTable(makeScanResult({
-      findings: [],
-      severityCounts: { critical: 0, high: 0, medium: 0, low: 0, info: 0 },
-      score: 100,
-    }));
+    printTable(
+      makeScanResult({
+        findings: [],
+        severityCounts: { critical: 0, high: 0, medium: 0, low: 0, info: 0 },
+        score: 100,
+      }),
+    );
 
     console.log = originalLog;
 

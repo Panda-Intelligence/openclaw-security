@@ -8,19 +8,23 @@ interface Props {
 
 export function PairFlow({ jwt, onJwtChange, onClose }: Props) {
   return (
-    <div style={{
-      marginTop: '1rem',
-      padding: '1rem',
-      background: 'var(--bg)',
-      border: '1px solid var(--border)',
-      borderRadius: 'var(--radius)',
-    }}>
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '0.75rem',
-      }}>
+    <div
+      style={{
+        marginTop: '1rem',
+        padding: '1rem',
+        background: 'var(--bg)',
+        border: '1px solid var(--border)',
+        borderRadius: 'var(--radius)',
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '0.75rem',
+        }}
+      >
         <h3 style={{ fontSize: '0.95rem', fontWeight: 600 }}>Deep Scan Authorization</h3>
         <button
           onClick={onClose}
@@ -39,7 +43,9 @@ export function PairFlow({ jwt, onJwtChange, onClose }: Props) {
       <ol style={{ fontSize: '0.85rem', color: 'var(--text-muted)', paddingLeft: '1.25rem', marginBottom: '1rem' }}>
         <li style={{ marginBottom: '0.25rem' }}>Open your OpenClaw Console in another tab</li>
         <li style={{ marginBottom: '0.25rem' }}>Open browser DevTools (F12) → Console</li>
-        <li style={{ marginBottom: '0.25rem' }}>Run: <code style={{ fontFamily: 'var(--mono)', color: 'var(--accent)' }}>localStorage.getItem('jwt')</code></li>
+        <li style={{ marginBottom: '0.25rem' }}>
+          Run: <code style={{ fontFamily: 'var(--mono)', color: 'var(--accent)' }}>localStorage.getItem('jwt')</code>
+        </li>
         <li>Paste the token below</li>
       </ol>
 

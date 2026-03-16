@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
-import { createScan } from '../lib/api.js';
-import { PairFlow } from './PairFlow.js';
+import type React from 'react';
+import { useState } from 'react';
+import { createScan } from '../lib/api';
+import { PairFlow } from './PairFlow';
 
 interface Props {
   onStart: (scanId: string) => void;
@@ -35,15 +36,15 @@ export function ScanForm({ onStart }: Props) {
   return (
     <div style={{ maxWidth: 560, margin: '0 auto' }}>
       <form onSubmit={handleSubmit}>
-        <div style={{
-          background: 'var(--bg-card)',
-          border: '1px solid var(--border)',
-          borderRadius: 'var(--radius)',
-          padding: '1.5rem',
-        }}>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>
-            Target URL
-          </label>
+        <div
+          style={{
+            background: 'var(--bg-card)',
+            border: '1px solid var(--border)',
+            borderRadius: 'var(--radius)',
+            padding: '1.5rem',
+          }}
+        >
+          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Target URL</label>
           <input
             type="text"
             value={url}
@@ -78,15 +79,9 @@ export function ScanForm({ onStart }: Props) {
             </label>
           </div>
 
-          {deepScan && showPair && (
-            <PairFlow jwt={jwt} onJwtChange={setJwt} onClose={() => setShowPair(false)} />
-          )}
+          {deepScan && showPair && <PairFlow jwt={jwt} onJwtChange={setJwt} onClose={() => setShowPair(false)} />}
 
-          {error && (
-            <p style={{ color: 'var(--critical)', marginTop: '1rem', fontSize: '0.85rem' }}>
-              {error}
-            </p>
-          )}
+          {error && <p style={{ color: 'var(--critical)', marginTop: '1rem', fontSize: '0.85rem' }}>{error}</p>}
 
           <button
             type="submit"

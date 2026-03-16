@@ -1,4 +1,4 @@
-import type { CheckDefinition, CheckResult, Finding } from '../../types.js';
+import type { CheckDefinition, CheckResult, Finding } from '../../types';
 
 const INJECTION_PATTERNS = [
   { pattern: /ignore\s+(all\s+)?previous\s+instructions/i, name: 'Instruction override' },

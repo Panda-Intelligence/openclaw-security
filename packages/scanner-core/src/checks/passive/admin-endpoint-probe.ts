@@ -1,4 +1,4 @@
-import type { CheckDefinition, CheckResult, Finding } from '../../types.js';
+import type { CheckDefinition, CheckResult, Finding } from '../../types';
 
 const ADMIN_ENDPOINTS = [
   { path: '/api/billing/admin/credits/grant', method: 'POST', body: { tenantId: 'test', amount: 1 } },
@@ -52,7 +52,9 @@ const check: CheckDefinition = {
             cweId: 'CWE-209',
           });
         }
-      } catch { /* timeout — endpoint may not exist */ }
+      } catch {
+        /* timeout — endpoint may not exist */
+      }
     }
 
     return {

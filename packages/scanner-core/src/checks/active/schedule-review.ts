@@ -1,8 +1,13 @@
-import type { CheckDefinition, CheckResult, Finding } from '../../types.js';
+import type { CheckDefinition, CheckResult, Finding } from '../../types';
 
 const SENSITIVE_KEYWORDS = [
-  /password/i, /secret/i, /api[_-]?key/i, /token/i,
-  /credentials?/i, /private[_-]?key/i, /database/i,
+  /password/i,
+  /secret/i,
+  /api[_-]?key/i,
+  /token/i,
+  /credentials?/i,
+  /private[_-]?key/i,
+  /database/i,
 ];
 
 const check: CheckDefinition = {
@@ -66,18 +71,22 @@ function estimateCronFrequency(cron: string): number | null {
   const parts = cron.trim().split(/\s+/);
   if (parts.length < 5) return null;
 
-  const [minute] = parts;
+  const minute = parts[0];
+  if (!minute) return null;
 
   // Every minute
   if (minute === '*') return 1;
 
   // */N pattern
   const stepMatch = minute.match(/^\*\/(\d+)$/);
-  if (stepMatch) return parseInt(stepMatch[1]);
+  if (stepMatch?.[1]) return parseInt(stepMatch[1]);
 
   // Specific minutes (comma-separated)
   if (minute.includes(',')) {
-    const mins = minute.split(',').map(Number).filter((n) => !isNaN(n));
+    const mins = minute
+      .split(',')
+      .map(Number)
+      .filter((n) => !isNaN(n));
     if (mins.length >= 2) return Math.round(60 / mins.length);
   }
 

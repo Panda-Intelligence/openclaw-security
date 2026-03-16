@@ -1,9 +1,9 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import { scanRoutes } from './api/scans.js';
-import { reportRoutes } from './api/reports.js';
-import { communityRoutes } from './api/community.js';
-import { handleScanQueue } from './queue/scan-consumer.js';
+import { communityRoutes } from './api/community';
+import { reportRoutes } from './api/reports';
+import { scanRoutes } from './api/scans';
+import { handleScanQueue } from './queue/scan-consumer';
 
 export interface Env {
   DB: D1Database;
@@ -14,11 +14,14 @@ export interface Env {
 const app = new Hono<{ Bindings: Env }>();
 
 // CORS
-app.use('/api/*', cors({
-  origin: '*',
-  allowMethods: ['GET', 'POST', 'OPTIONS'],
-  allowHeaders: ['Content-Type'],
-}));
+app.use(
+  '/api/*',
+  cors({
+    origin: '*',
+    allowMethods: ['GET', 'POST', 'OPTIONS'],
+    allowHeaders: ['Content-Type'],
+  }),
+);
 
 // Health check
 app.get('/health', (c) => c.json({ status: 'ok', service: 'openclaw-security' }));

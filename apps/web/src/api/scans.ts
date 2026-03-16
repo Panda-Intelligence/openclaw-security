@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import type { Env } from '../worker.js';
+import type { Env } from '../worker';
 
 export const scanRoutes = new Hono<{ Bindings: Env }>();
 
@@ -32,10 +32,13 @@ scanRoutes.post('/', async (c) => {
   // Enqueue scan job
   await c.env.SCAN_QUEUE.send({ scanId: id, jwt: body.jwt });
 
-  return c.json({
-    success: true,
-    data: { id, status: 'pending', targetUrl: url.toString(), mode },
-  }, 201);
+  return c.json(
+    {
+      success: true,
+      data: { id, status: 'pending', targetUrl: url.toString(), mode },
+    },
+    201,
+  );
 });
 
 // GET /api/scans — list recent scans
@@ -55,11 +58,7 @@ scanRoutes.get('/', async (c) => {
 // GET /api/scans/:id — get scan status
 scanRoutes.get('/:id', async (c) => {
   const id = c.req.param('id');
-  const result = await c.env.DB.prepare(
-    `SELECT * FROM scans WHERE id = ?`,
-  )
-    .bind(id)
-    .first();
+  const result = await c.env.DB.prepare(`SELECT * FROM scans WHERE id = ?`).bind(id).first();
 
   if (!result) {
     return c.json({ success: false, error: 'Scan not found' }, 404);

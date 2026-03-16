@@ -1,5 +1,5 @@
-import type { CheckDefinition, CheckContext, CheckResult } from './types.js';
-import { topoSort } from './check-registry.js';
+import { topoSort } from './check-registry';
+import type { CheckContext, CheckDefinition, CheckResult } from './types';
 
 export async function runChecks(
   checks: CheckDefinition[],
@@ -39,9 +39,7 @@ export async function runChecks(
       break;
     }
 
-    const batchResults = await Promise.all(
-      ready.map((check) => executeCheck(check, ctx)),
-    );
+    const batchResults = await Promise.all(ready.map((check) => executeCheck(check, ctx)));
 
     for (const result of batchResults) {
       results.push(result);

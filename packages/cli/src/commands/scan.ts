@@ -1,7 +1,7 @@
-import { scan, formatReport } from '@openclaw-security/scanner-core';
-import type { ScanConfig, ScanMode, ReportFormat } from '@openclaw-security/scanner-core';
-import { printTable } from '../output/table.js';
+import type { ReportFormat, ScanConfig, ScanMode } from '@openclaw-security/scanner-core';
+import { formatReport, scan } from '@openclaw-security/scanner-core';
 import { writeFileSync } from 'fs';
+import { printTable } from '../output/table';
 
 interface ScanOptions {
   url: string;
@@ -24,26 +24,26 @@ function parseArgs(args: string[]): ScanOptions {
 
   let i = 0;
   while (i < args.length) {
-    const arg = args[i];
+    const arg = args[i]!;
     switch (arg) {
       case '--deep':
         opts.deep = true;
         break;
       case '--token':
-        opts.token = args[++i];
+        opts.token = args[++i] ?? '';
         opts.deep = true;
         break;
       case '--format':
-        opts.format = args[++i] as 'table' | 'json' | 'markdown';
+        opts.format = (args[++i] ?? 'table') as 'table' | 'json' | 'markdown';
         break;
       case '--output':
-        opts.output = args[++i];
+        opts.output = args[++i] ?? '';
         break;
       case '--timeout':
-        opts.timeout = parseInt(args[++i]);
+        opts.timeout = parseInt(args[++i] ?? '15000');
         break;
       case '--concurrency':
-        opts.concurrency = parseInt(args[++i]);
+        opts.concurrency = parseInt(args[++i] ?? '5');
         break;
       default:
         if (!arg.startsWith('-') && !opts.url) {
