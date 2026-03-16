@@ -1,19 +1,16 @@
 import { Hono } from 'hono';
 import type { Env } from '../worker';
 import { handleScanQueue } from '../queue/scan-consumer';
+import { validateBody, createScanSchema } from '../middleware/validate';
 import { PLAN_LIMITS } from '../types';
 import type { PlanTier } from '../types';
 
-export const scanRoutes = new Hono<{ Bindings: Env; Variables: { userId: string } }>();
+export const scanRoutes = new Hono<{ Bindings: Env; Variables: { userId: string; validatedBody: unknown } }>();
 
 // POST /api/scans — create a new scan
-scanRoutes.post('/', async (c) => {
+scanRoutes.post('/', validateBody(createScanSchema), async (c) => {
   const userId = c.get('userId');
-  const body = await c.req.json<{ targetUrl: string; mode?: string; jwt?: string; projectId?: string }>();
-
-  if (!body.targetUrl) {
-    return c.json({ success: false, error: 'targetUrl is required' }, 400);
-  }
+  const body = c.get('validatedBody') as { targetUrl: string; mode: string; jwt?: string; projectId?: string };
 
   let url: URL;
   try {

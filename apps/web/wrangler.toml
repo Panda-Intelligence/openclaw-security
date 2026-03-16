@@ -22,3 +22,15 @@ queue = "security-scans"
 queue = "security-scans"
 max_batch_size = 1
 max_retries = 2
+
+# Dev defaults — production values must be set via `wrangler secret put`
+[vars]
+GOOGLE_CLIENT_ID = ""
+GOOGLE_CLIENT_SECRET = ""
+GOOGLE_REDIRECT_URI = "http://localhost:8787/api/auth/google/callback"
+GITHUB_CLIENT_ID = ""
+GITHUB_CLIENT_SECRET = ""
+GITHUB_REDIRECT_URI = "http://localhost:8787/api/auth/github/callback"
+STRIPE_SECRET_KEY = ""
+STRIPE_WEBHOOK_SECRET = ""
+STRIPE_PRICE_STARTER = ""

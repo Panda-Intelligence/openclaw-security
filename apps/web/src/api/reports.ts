@@ -1,16 +1,23 @@
 import { Hono } from 'hono';
 import type { Env } from '../worker';
 
-export const reportRoutes = new Hono<{ Bindings: Env }>();
+export const reportRoutes = new Hono<{ Bindings: Env; Variables: { userId: string } }>();
 
 // GET /api/reports/:scanId — get full report with findings
 reportRoutes.get('/:scanId', async (c) => {
   const scanId = c.req.param('scanId');
+  const userId = c.get('userId');
 
   const scan = await c.env.DB.prepare(`SELECT * FROM scans WHERE id = ?`).bind(scanId).first();
 
   if (!scan) {
     return c.json({ success: false, error: 'Scan not found' }, 404);
+  }
+
+  // Authorization: if scan belongs to a user, only that user may access it
+  const scanUserId = scan['user_id'] as string | null;
+  if (scanUserId && scanUserId !== userId) {
+    return c.json({ success: false, error: 'Forbidden' }, 403);
   }
 
   const findings = await c.env.DB.prepare(

@@ -1,18 +1,15 @@
 import { Hono } from 'hono';
 import type { Env } from '../worker';
+import { validateBody, createProjectSchema } from '../middleware/validate';
 import { PLAN_LIMITS } from '../types';
 import type { PlanTier } from '../types';
 
-export const projectRoutes = new Hono<{ Bindings: Env; Variables: { userId: string } }>();
+export const projectRoutes = new Hono<{ Bindings: Env; Variables: { userId: string; validatedBody: unknown } }>();
 
 // POST /api/projects
-projectRoutes.post('/', async (c) => {
+projectRoutes.post('/', validateBody(createProjectSchema), async (c) => {
   const userId = c.get('userId');
-  const body = await c.req.json<{ name: string; targetUrl: string }>();
-
-  if (!body.name || !body.targetUrl) {
-    return c.json({ success: false, error: 'name and targetUrl are required' }, 400);
-  }
+  const body = c.get('validatedBody') as { name: string; targetUrl: string };
 
   // Check project quota
   const sub = await c.env.DB.prepare(

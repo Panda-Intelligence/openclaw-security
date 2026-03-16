@@ -6,6 +6,7 @@ import { communityRoutes } from './api/community';
 import { projectRoutes } from './api/projects';
 import { reportRoutes } from './api/reports';
 import { scanRoutes } from './api/scans';
+import { rateLimit } from './middleware/rate-limit';
 import { handleScanQueue } from './queue/scan-consumer';
 import { getAuthUser } from './utils/auth';
 
@@ -33,7 +34,14 @@ const app = new Hono<{ Bindings: Env; Variables: Variables }>();
 app.use(
   '/api/*',
   cors({
-    origin: '*',
+    origin: (origin) => {
+      // Allow same-origin (no Origin header) and localhost for dev
+      if (!origin) return '*';
+      if (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) return origin;
+      // Production: restrict to the deployed domain
+      if (origin.endsWith('.openclaw.com') || origin === 'https://openclaw.com') return origin;
+      return null;
+    },
     allowMethods: ['GET', 'POST', 'DELETE', 'OPTIONS'],
     allowHeaders: ['Content-Type', 'Authorization'],
   }),
@@ -41,6 +49,12 @@ app.use(
 
 // Health
 app.get('/health', (c) => c.json({ status: 'ok', service: 'openclaw-security' }));
+
+// Rate limiting on sensitive endpoints
+app.use('/api/auth/*', rateLimit({ limit: 15, windowMs: 60_000, keyPrefix: 'auth' }));
+app.use('/api/billing/webhook', rateLimit({ limit: 100, windowMs: 60_000, keyPrefix: 'webhook' }));
+app.use('/api/scans', rateLimit({ limit: 20, windowMs: 60_000, keyPrefix: 'scans' }));
+app.use('/api/community', rateLimit({ limit: 30, windowMs: 60_000, keyPrefix: 'community' }));
 
 // Public routes (before auth middleware)
 app.route('/api/auth', authRoutes);

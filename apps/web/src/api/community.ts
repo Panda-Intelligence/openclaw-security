@@ -1,21 +1,18 @@
 import { Hono } from 'hono';
 import type { Env } from '../worker';
+import { validateBody, communityReportSchema } from '../middleware/validate';
 
-export const communityRoutes = new Hono<{ Bindings: Env }>();
+export const communityRoutes = new Hono<{ Bindings: Env; Variables: { validatedBody: unknown } }>();
 
 // POST /api/community — submit anonymous report
-communityRoutes.post('/', async (c) => {
-  const body = await c.req.json<{
+communityRoutes.post('/', validateBody(communityReportSchema), async (c) => {
+  const body = c.get('validatedBody') as {
     targetHost: string;
     score: number;
     severityCounts: Record<string, number>;
     findingCount: number;
     platformVersion?: string;
-  }>();
-
-  if (!body.targetHost || body.score === undefined) {
-    return c.json({ success: false, error: 'targetHost and score are required' }, 400);
-  }
+  };
 
   const id = crypto.randomUUID();
   const scanId = crypto.randomUUID();

@@ -1,9 +1,10 @@
 import { Hono } from 'hono';
 import type { Env } from '../worker';
+import { validateBody, checkoutSchema } from '../middleware/validate';
 import { getPlans, PLAN_LIMITS } from '../types';
 import type { PlanTier } from '../types';
 
-export const billingRoutes = new Hono<{ Bindings: Env; Variables: { userId: string } }>();
+export const billingRoutes = new Hono<{ Bindings: Env; Variables: { userId: string; validatedBody: unknown } }>();
 
 // GET /api/billing/plans (public)
 billingRoutes.get('/plans', (c) => {
@@ -34,13 +35,8 @@ billingRoutes.get('/subscription', async (c) => {
 });
 
 // POST /api/billing/checkout
-billingRoutes.post('/checkout', async (c) => {
+billingRoutes.post('/checkout', validateBody(checkoutSchema), async (c) => {
   const userId = c.get('userId');
-  const body = await c.req.json<{ plan: string }>();
-
-  if (body.plan !== 'starter') {
-    return c.json({ success: false, error: 'Invalid plan' }, 400);
-  }
 
   // Get or create Stripe customer
   const sub = await c.env.DB.prepare(
@@ -102,13 +98,11 @@ billingRoutes.post('/webhook', async (c) => {
   const sig = c.req.header('stripe-signature');
   if (!sig) return c.json({ error: 'Missing signature' }, 400);
 
-  // Simple signature check (in production, use Stripe SDK)
-  // For now, just parse the event
   let event: { id: string; type: string; data: { object: Record<string, unknown> } };
   try {
-    event = JSON.parse(body);
-  } catch {
-    return c.json({ error: 'Invalid body' }, 400);
+    event = await verifyStripeSignature(body, sig, c.env.STRIPE_WEBHOOK_SECRET);
+  } catch (err) {
+    return c.json({ error: err instanceof Error ? err.message : 'Invalid signature' }, 400);
   }
 
   // Idempotency check
@@ -185,4 +179,62 @@ function flattenParams(obj: Record<string, unknown>, prefix = ''): [string, stri
     }
   }
   return result;
+}
+
+// ── Stripe webhook signature verification ──
+
+const STRIPE_TOLERANCE_SECONDS = 300; // 5 minutes
+
+export async function verifyStripeSignature(
+  body: string,
+  sigHeader: string,
+  secret: string,
+): Promise<{ id: string; type: string; data: { object: Record<string, unknown> } }> {
+  // Parse "t=timestamp,v1=signature" header
+  const parts = new Map<string, string>();
+  for (const item of sigHeader.split(',')) {
+    const [key, ...rest] = item.split('=');
+    if (key && rest.length) parts.set(key.trim(), rest.join('=').trim());
+  }
+
+  const timestamp = parts.get('t');
+  const v1Signature = parts.get('v1');
+  if (!timestamp || !v1Signature) {
+    throw new Error('Invalid stripe-signature header');
+  }
+
+  // Timestamp tolerance check
+  const ts = parseInt(timestamp, 10);
+  if (Number.isNaN(ts) || Math.abs(Date.now() / 1000 - ts) > STRIPE_TOLERANCE_SECONDS) {
+    throw new Error('Webhook timestamp outside tolerance');
+  }
+
+  // HMAC-SHA256: sign "timestamp.body"
+  const key = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(secret),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign'],
+  );
+  const mac = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(`${timestamp}.${body}`));
+  const expected = Array.from(new Uint8Array(mac))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+
+  // Timing-safe comparison
+  if (expected.length !== v1Signature.length || !timingSafeEqual(expected, v1Signature)) {
+    throw new Error('Signature mismatch');
+  }
+
+  return JSON.parse(body);
+}
+
+export function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return result === 0;
 }

@@ -1,6 +1,7 @@
 import type React from 'react';
-import { useState } from 'react';
-import { createScan } from '../lib/api';
+import { useEffect, useState } from 'react';
+import { createScan, getProjects, isLoggedIn } from '../lib/api';
+import type { ProjectRecord } from '../lib/api';
 import { PairFlow } from './PairFlow';
 
 interface Props {
@@ -14,6 +15,17 @@ export function ScanForm({ onStart }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPair, setShowPair] = useState(false);
+  const [projects, setProjects] = useState<ProjectRecord[]>([]);
+  const [selectedProjectId, setSelectedProjectId] = useState('');
+  const loggedIn = isLoggedIn();
+
+  useEffect(() => {
+    if (loggedIn) {
+      getProjects()
+        .then((res) => setProjects(res.data))
+        .catch(() => {});
+    }
+  }, [loggedIn]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,7 +36,7 @@ export function ScanForm({ onStart }: Props) {
 
     try {
       const mode = deepScan ? 'active' : 'passive';
-      const result = await createScan(url.trim(), mode, deepScan ? jwt : undefined);
+      const result = await createScan(url.trim(), mode, deepScan ? jwt : undefined, selectedProjectId || undefined);
       onStart(result.data.id);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to start scan');
@@ -63,6 +75,31 @@ export function ScanForm({ onStart }: Props) {
               outline: 'none',
             }}
           />
+
+          {loggedIn && projects.length > 0 && (
+            <div style={{ marginTop: '1rem' }}>
+              <label htmlFor="project-select" style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500, fontSize: '0.9rem' }}>Project</label>
+              <select
+                id="project-select"
+                value={selectedProjectId}
+                onChange={(e) => setSelectedProjectId(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '0.6rem 0.75rem',
+                  background: 'var(--bg)',
+                  border: '1px solid var(--border)',
+                  borderRadius: 'var(--radius)',
+                  color: 'var(--text)',
+                  fontSize: '0.9rem',
+                }}
+              >
+                <option value="">No project</option>
+                {projects.map((p) => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <div style={{ marginTop: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <input
