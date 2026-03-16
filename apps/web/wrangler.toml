@@ -23,14 +23,62 @@ queue = "security-scans"
 max_batch_size = 1
 max_retries = 2
 
-# Dev defaults — production values must be set via `wrangler secret put`
+# ── Public vars (safe to commit) ──
+# Secrets (JWT_SECRET, *_CLIENT_SECRET, STRIPE_SECRET_KEY, STRIPE_WEBHOOK_SECRET)
+# are loaded from .dev.vars locally and `wrangler secret put` in production.
 [vars]
 GOOGLE_CLIENT_ID = ""
-GOOGLE_CLIENT_SECRET = ""
 GOOGLE_REDIRECT_URI = "http://localhost:8787/api/auth/google/callback"
 GITHUB_CLIENT_ID = ""
-GITHUB_CLIENT_SECRET = ""
 GITHUB_REDIRECT_URI = "http://localhost:8787/api/auth/github/callback"
-STRIPE_SECRET_KEY = ""
-STRIPE_WEBHOOK_SECRET = ""
 STRIPE_PRICE_STARTER = ""
+
+# ── Production environment ──
+[env.production]
+name = "openclaw-security-web"
+
+[env.production.vars]
+GOOGLE_CLIENT_ID = ""
+GOOGLE_REDIRECT_URI = "https://security.openclaw.com/api/auth/google/callback"
+GITHUB_CLIENT_ID = ""
+GITHUB_REDIRECT_URI = "https://security.openclaw.com/api/auth/github/callback"
+STRIPE_PRICE_STARTER = ""
+
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "openclaw-security-db"
+database_id = "placeholder-set-after-create"
+
+[[env.production.queues.producers]]
+binding = "SCAN_QUEUE"
+queue = "security-scans"
+
+[[env.production.queues.consumers]]
+queue = "security-scans"
+max_batch_size = 1
+max_retries = 2
+
+# ── Staging environment ──
+[env.staging]
+name = "openclaw-security-web-staging"
+
+[env.staging.vars]
+GOOGLE_CLIENT_ID = ""
+GOOGLE_REDIRECT_URI = "https://staging.security.openclaw.com/api/auth/google/callback"
+GITHUB_CLIENT_ID = ""
+GITHUB_REDIRECT_URI = "https://staging.security.openclaw.com/api/auth/github/callback"
+STRIPE_PRICE_STARTER = ""
+
+[[env.staging.d1_databases]]
+binding = "DB"
+database_name = "openclaw-security-db-staging"
+database_id = "placeholder-set-after-create"
+
+[[env.staging.queues.producers]]
+binding = "SCAN_QUEUE"
+queue = "security-scans-staging"
+
+[[env.staging.queues.consumers]]
+queue = "security-scans-staging"
+max_batch_size = 1
+max_retries = 2
