@@ -26,6 +26,9 @@
     "apps/*"
   ],
   "scripts": {
+    "dev": "cd apps/web && bun run dev:ui",
+    "dev:worker": "cd apps/web && bun run dev",
+    "scan": "bun run packages/cli/src/index.ts scan",
     "test": "bun test",
     "build": "bun run --filter '*' build",
     "lint": "bunx biome lint .",
@@ -33,7 +36,10 @@
     "format": "bunx biome format --write .",
     "format:check": "bunx biome format .",
     "typecheck": "bunx tsc --noEmit -p packages/scanner-core/tsconfig.json && bunx tsc --noEmit -p packages/cli/tsconfig.json && bunx tsc --noEmit -p apps/web/tsconfig.json && bunx tsc --noEmit -p apps/extension/tsconfig.json",
-    "ci": "bun run typecheck && bun run lint && bun test"
+    "ci": "bun run typecheck && bun run lint && bun test",
+    "db:create": "cd apps/web && bunx wrangler d1 create openclaw-security-db",
+    "db:migrate:local": "cd apps/web && bunx wrangler d1 migrations apply openclaw-security-db --local",
+    "db:migrate:remote": "cd apps/web && bunx wrangler d1 migrations apply openclaw-security-db --remote"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.7",

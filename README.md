@@ -114,14 +114,38 @@ Penalty-based from 100. Deductions per finding:
 
 Categories: `auth`, `headers`, `exposure`, `config`, `data`, `infrastructure`
 
-## Development
+## Local development
+
+### CLI only (no infra needed)
 
 ```bash
-bun install                          # Install dependencies
-bun test                             # Run all 121 tests
-bunx tsc --noEmit -p <pkg>/tsconfig.json  # Type check a package
-cd apps/web && bun run dev:ui        # Web dev server
-cd apps/web && bun run build         # Build frontend
+bun install
+bun run scan https://your-deployment.example.com
+bun run scan https://example.com --format json --output report.json
+```
+
+### Full stack (Web dashboard)
+
+```bash
+bun install
+bun run db:migrate:local     # Create D1 tables
+bun run dev:worker &         # API on :8787 (wrangler + D1)
+bun run dev                  # UI on :5173 (Vite, proxies /api → :8787)
+```
+
+Open http://localhost:5173
+
+### All commands
+
+```bash
+bun run dev              # Web UI dev server (port 5173)
+bun run dev:worker       # API + D1 (port 8787, wrangler)
+bun run scan <url>       # CLI scan shortcut
+bun test                 # Run all 121 tests
+bun run typecheck        # Type check all packages
+bun run lint             # Biome lint
+bun run ci               # Full CI pipeline
+bun run build            # Build all packages
 ```
 
 ## Tech stack

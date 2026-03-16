@@ -5,11 +5,15 @@ compatibility_date = "2025-03-10"
 [assets]
 directory = "dist"
 
+# D1 database — local dev uses wrangler's built-in SQLite.
+# For production: run `bun run db:create` then replace database_id.
 [[d1_databases]]
 binding = "DB"
 database_name = "openclaw-security-db"
 database_id = "placeholder-set-after-create"
 
+# Queues — only available in deployed workers.
+# Local dev falls back to direct execution (no queue).
 [[queues.producers]]
 binding = "SCAN_QUEUE"
 queue = "security-scans"

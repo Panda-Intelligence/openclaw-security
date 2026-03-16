@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import type { Env } from '../worker';
+import { handleScanQueue } from '../queue/scan-consumer';
 
 export const scanRoutes = new Hono<{ Bindings: Env }>();
 
@@ -29,8 +30,13 @@ scanRoutes.post('/', async (c) => {
     .bind(id, url.toString(), url.host, mode)
     .run();
 
-  // Enqueue scan job
-  await c.env.SCAN_QUEUE.send({ scanId: id, jwt: body.jwt });
+  // Enqueue scan job, or run inline if Queue is unavailable (local dev)
+  try {
+    await c.env.SCAN_QUEUE.send({ scanId: id, jwt: body.jwt });
+  } catch {
+    // Queue unavailable (local dev) — run scan inline
+    handleScanQueue({ scanId: id, jwt: body.jwt }, c.env).catch(() => {});
+  }
 
   return c.json(
     {
