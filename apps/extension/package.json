@@ -4,7 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "bunx tsc",
+    "build": "bun run scripts/build.ts",
+    "typecheck": "bunx tsc --noEmit",
     "test": "bun test"
   },
   "dependencies": {

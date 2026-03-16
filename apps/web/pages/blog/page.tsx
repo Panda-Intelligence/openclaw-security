@@ -35,6 +35,7 @@ export default function BlogPage() {
         </p>
         <article
           style={{ lineHeight: 1.7, color: 'var(--text)' }}
+          // biome-ignore lint/security/noDangerouslySetInnerHtml: content is HTML-escaped before markdown conversion
           dangerouslySetInnerHTML={{ __html: markdownToHtml(content) }}
         />
       </div>
@@ -76,9 +77,14 @@ export default function BlogPage() {
   );
 }
 
+/** Escape HTML entities to prevent XSS */
+function escapeHtml(s: string): string {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
 /** Minimal markdown → HTML (headings, paragraphs, code blocks, bold, links, lists) */
 function markdownToHtml(md: string): string {
-  return md
+  return escapeHtml(md)
     .replace(/^### (.+)$/gm, '<h3>$1</h3>')
     .replace(/^## (.+)$/gm, '<h2>$1</h2>')
     .replace(/^# (.+)$/gm, '<h1>$1</h1>')

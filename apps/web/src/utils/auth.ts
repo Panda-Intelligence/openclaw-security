@@ -1,10 +1,6 @@
 import type { AuthUser } from '../types';
+import type { Env } from '../worker';
 import { verifyJwt } from './jwt';
-
-export interface Env {
-  DB: D1Database;
-  JWT_SECRET?: string;
-}
 
 const DEV_SECRET = 'openclaw-security-dev-secret-do-not-use-in-prod';
 
