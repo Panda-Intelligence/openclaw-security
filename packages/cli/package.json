@@ -1,0 +1,20 @@
+{
+  "name": "@openclaw-security/cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "openclaw-security": "src/index.ts"
+  },
+  "scripts": {
+    "test": "bun test",
+    "build": "bunx tsc"
+  },
+  "dependencies": {
+    "@openclaw-security/scanner-core": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "@types/bun": "^1.2.0"
+  }
+}

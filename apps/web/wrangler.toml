@@ -1,0 +1,20 @@
+name = "openclaw-security-web"
+main = "src/worker.ts"
+compatibility_date = "2025-03-10"
+
+[assets]
+directory = "dist"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "openclaw-security-db"
+database_id = "placeholder-set-after-create"
+
+[[queues.producers]]
+binding = "SCAN_QUEUE"
+queue = "security-scans"
+
+[[queues.consumers]]
+queue = "security-scans"
+max_batch_size = 1
+max_retries = 2
