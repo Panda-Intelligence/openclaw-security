@@ -122,6 +122,7 @@ describe('projectRoutes', () => {
 // ── Community tests ──
 
 import { communityRoutes } from '../src/api/community';
+import { authRoutes } from '../src/api/auth';
 
 function communityApp(db: ReturnType<typeof mockDb>) {
   const app = new Hono<{ Bindings: Env; Variables: { validatedBody: unknown } }>();
@@ -182,6 +183,69 @@ describe('communityRoutes', () => {
     expect(res.status).toBe(200);
     const data = await res.json();
     expect(data.success).toBe(true);
+  });
+
+  test('GET /intelligence returns public intelligence overview', async () => {
+    const db = mockDb();
+    const { app, env } = communityApp(db);
+    const res = await appRequest(app, env, '/intelligence');
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data.success).toBe(true);
+    expect(data.data.marketplaceSkills.length).toBeGreaterThan(0);
+    expect(data.data.sources.length).toBeGreaterThan(0);
+  });
+
+  test('GET /intelligence/gateway returns gateway hardening items', async () => {
+    const db = mockDb();
+    const { app, env } = communityApp(db);
+    const res = await appRequest(app, env, '/intelligence/gateway');
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data.success).toBe(true);
+    expect(data.data.length).toBeGreaterThan(0);
+  });
+});
+
+function authApp(db: ReturnType<typeof mockDb>) {
+  const app = new Hono<{ Bindings: Env; Variables: { userId: string } }>();
+  app.route('/', authRoutes);
+  return { app, env: fakeEnv(db) };
+}
+
+describe('authRoutes', () => {
+  test('GET /me returns 401 without authentication', async () => {
+    const db = mockDb();
+    const { app, env } = authApp(db);
+    const res = await appRequest(app, env, '/me');
+    expect(res.status).toBe(401);
+  });
+
+  test('GET /me succeeds with valid bearer token even without outer middleware', async () => {
+    const { signJwt } = await import('../src/utils/jwt');
+    const token = await signJwt({ sub: 'user-1', email: 'test@example.com', name: 'Tester' }, 'dev-secret');
+    const db = mockDb({
+      firstResult: { id: 'user-1', email: 'test@example.com', name: 'Tester', picture: null },
+    });
+    let queryCount = 0;
+    const originalPrepare = db.prepare;
+    db.prepare = ((sql: string) => {
+      const stmt = originalPrepare(sql);
+      return {
+        ...stmt,
+        bind: (...args: unknown[]) => {
+          queryCount += 1;
+          return stmt.bind(...args);
+        },
+      };
+    }) as typeof db.prepare;
+    const { app, env } = authApp(db);
+    env.JWT_SECRET = 'dev-secret';
+    const res = await appRequest(app, env, '/me', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    expect(res.status).toBe(200);
+    expect(queryCount).toBeGreaterThan(0);
   });
 });
 

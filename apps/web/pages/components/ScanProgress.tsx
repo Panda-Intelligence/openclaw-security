@@ -52,38 +52,22 @@ export function ScanProgress({ scanId, onComplete }: Props) {
   const dots = '.'.repeat((elapsed % 3) + 1);
 
   return (
-    <div
-      style={{
-        maxWidth: 500,
-        margin: '0 auto',
-        textAlign: 'center',
-        padding: '3rem 0',
-      }}
-    >
-      <div
-        style={{
-          width: 80,
-          height: 80,
-          margin: '0 auto 2rem',
-          border: '3px solid var(--border)',
-          borderTopColor: 'var(--accent)',
-          borderRadius: '50%',
-          animation: 'spin 1s linear infinite',
-        }}
-      />
+    <div className="progress-shell">
+      <div className="surface-panel">
+        <div className="progress-ring" />
 
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        <div className="page-header" style={{ marginBottom: 0 }}>
+          <h1 style={{ fontSize: '2.4rem' }}>
+            {status === 'pending' ? 'Queued' : 'Scanning'}
+            {dots}
+          </h1>
+          <p>{elapsed}s elapsed · We are polling the worker for the latest status.</p>
+        </div>
 
-      <h2 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '0.5rem' }}>
-        {status === 'pending' ? 'Queued' : 'Scanning'}
-        {dots}
-      </h2>
-
-      <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>{elapsed}s elapsed</p>
-
-      {status === 'failed' && (
-        <p style={{ color: 'var(--critical)', marginTop: '1rem' }}>Scan failed. Please try again.</p>
-      )}
+        {status === 'failed' && (
+          <p style={{ color: 'var(--critical)', marginTop: '1rem' }}>Scan failed. Please try again.</p>
+        )}
+      </div>
     </div>
   );
 }

@@ -4,7 +4,7 @@
 
 ```bash
 bun install              # Install all workspace dependencies
-bun test                 # Run all tests (191 tests)
+bun test                 # Run all tests (198 tests)
 bun run typecheck        # Type check all 4 packages
 bun run lint             # Biome lint
 bun run ci               # Full CI: typecheck + lint + test
@@ -59,8 +59,24 @@ Open http://localhost:5173 — paste a URL → scan.
 
 - `packages/scanner-core` — Shared scanning engine (types, checks, scoring, report formatting)
 - `packages/cli` — CLI tool (`openclaw-security scan <url>`)
-- `apps/web` — Cloudflare Worker + React SPA dashboard
-- `apps/extension` — Browser extension (Manifest V3, Wappalyzer-style detection)
+- `apps/web` — Cloudflare Worker + React SPA dashboard (D1, Queues, Stripe billing)
+- `apps/extension` — Browser extension (Manifest V3, auto-detection)
+
+### Web app layers
+
+1. **Frontend** (`pages/`) — React SPA with client-side routing. Key pages: scan form, reports, dashboard, intelligence board, community, blog, pricing.
+2. **API** (`src/api/`) — Hono routes: scans, reports, projects, billing, auth (Google/GitHub OAuth), community + intelligence.
+3. **Intelligence** (`src/intelligence.ts`) — Curated security intelligence data (5 boards, 15 items) sourced from official OpenClaw docs.
+4. **Data** (`src/state/schema.sql`) — D1 schema: scans, findings, community_reports, users, subscriptions, projects, billing_events.
+5. **Middleware** (`src/middleware/`) — Rate limiting, Zod input validation.
+
+### Environments
+
+```bash
+wrangler dev                           # Local (reads .dev.vars for secrets)
+wrangler deploy --env staging          # Staging (staging.security.pandacat.ai)
+wrangler deploy --env production       # Production (security.pandacat.ai)
+```
 
 ### Scan pipeline
 

@@ -1,6 +1,5 @@
-import type React from 'react';
-import { useEffect, useState } from 'react';
-import { getMe, getProjects, getScans, createProject, deleteProject, logout } from '../lib/api';
+import { useEffect, useMemo, useState } from 'react';
+import { createProject, deleteProject, getMe, getProjects, getScans, logout } from '../lib/api';
 import type { ProjectRecord, ScanRecord } from '../lib/api';
 
 export default function DashboardPage() {
@@ -20,6 +19,17 @@ export default function DashboardPage() {
     getProjects().then((r) => setProjects(r.data));
     getScans().then((r) => setRecentScans(r.data.slice(0, 10)));
   }, []);
+
+  const averageScore = useMemo(() => {
+    const scores = recentScans.flatMap((scan) => (scan.score === null ? [] : [scan.score]));
+    if (scores.length === 0) return '—';
+    return Math.round(scores.reduce((sum, score) => sum + score, 0) / scores.length).toString();
+  }, [recentScans]);
+
+  const activeCount = useMemo(
+    () => recentScans.filter((scan) => scan.status === 'running' || scan.status === 'pending').length,
+    [recentScans],
+  );
 
   const handleCreateProject = async () => {
     if (!newName || !newUrl) return;
@@ -41,129 +51,126 @@ export default function DashboardPage() {
   };
 
   return (
-    <div style={{ maxWidth: 800, margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <div>
-          <h1 style={{ fontSize: '1.5rem', fontWeight: 700 }}>Dashboard</h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+    <div className="page-medium dashboard-layout">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+        <div className="page-header" style={{ marginBottom: 0 }}>
+          <h1 style={{ fontSize: '2.8rem' }}>Dashboard</h1>
+          <p>
             {user?.email} — <span style={{ color: 'var(--accent)', textTransform: 'capitalize' }}>{plan}</span> plan
           </p>
         </div>
-        <button type="button" onClick={logout} style={{ ...linkBtn, color: 'var(--text-muted)' }}>
+        <button type="button" onClick={logout} className="button-secondary">
           Sign out
         </button>
       </div>
 
-      {/* Projects */}
-      <section style={cardStyle}>
-        <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1rem' }}>Projects ({projects.length})</h2>
-
-        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
-          <input
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            placeholder="Project name"
-            style={inputStyle}
-          />
-          <input
-            value={newUrl}
-            onChange={(e) => setNewUrl(e.target.value)}
-            placeholder="https://..."
-            style={{ ...inputStyle, flex: 2 }}
-          />
-          <button type="button" onClick={handleCreateProject} style={btnStyle}>
-            Add
-          </button>
+      <section className="dashboard-summary fade-up">
+        <div className="dashboard-summary-card">
+          <strong>{projects.length}</strong>
+          <span>Tracked projects</span>
         </div>
-
-        {error && <p style={{ color: 'var(--critical)', fontSize: '0.85rem', marginBottom: '0.5rem' }}>{error}</p>}
-
-        {projects.map((p) => (
-          <div
-            key={p.id}
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              padding: '0.5rem 0',
-              borderBottom: '1px solid var(--border)',
-            }}
-          >
-            <div>
-              <strong>{p.name}</strong>
-              <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', marginLeft: '0.75rem' }}>
-                {p.target_url}
-              </span>
-            </div>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <a href={`/?projectId=${p.id}&url=${encodeURIComponent(p.target_url)}`} style={linkBtn}>
-                Scan
-              </a>
-              <button type="button" onClick={() => handleDelete(p.id)} style={{ ...linkBtn, color: 'var(--critical)' }}>
-                Delete
-              </button>
-            </div>
-          </div>
-        ))}
+        <div className="dashboard-summary-card">
+          <strong>{recentScans.length}</strong>
+          <span>Recent scans</span>
+        </div>
+        <div className="dashboard-summary-card">
+          <strong>{averageScore}</strong>
+          <span>Average score</span>
+        </div>
       </section>
 
-      {/* Recent scans */}
-      <section style={{ ...cardStyle, marginTop: '1.5rem' }}>
-        <h2 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '1rem' }}>Recent Scans</h2>
-        {recentScans.length === 0 ? (
-          <p style={{ color: 'var(--text-muted)' }}>No scans yet</p>
-        ) : (
-          recentScans.map((s) => (
-            <div key={s.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.4rem 0', borderBottom: '1px solid var(--border)' }}>
-              <span style={{ fontFamily: 'var(--mono)', fontSize: '0.85rem' }}>{s.target_host}</span>
-              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{s.status}</span>
-                {s.score !== null && (
-                  <span style={{ fontWeight: 600, color: s.score >= 80 ? 'var(--success)' : s.score >= 50 ? 'var(--medium)' : 'var(--critical)' }}>
-                    {s.score}
-                  </span>
-                )}
-              </div>
+      <section className="dashboard-grid">
+        <div className="dashboard-card fade-up">
+          <div className="dashboard-card-header">
+            <div>
+              <h2 className="dashboard-card-title">Projects</h2>
+              <p className="dashboard-card-copy">Create scan targets and keep URLs organized by deployment.</p>
             </div>
-          ))
-        )}
+            <span className="status-pill">{projects.length} total</span>
+          </div>
+
+          <div className="dashboard-form-row">
+            <input
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              placeholder="Project name"
+              className="field-input"
+            />
+            <input
+              value={newUrl}
+              onChange={(e) => setNewUrl(e.target.value)}
+              placeholder="https://..."
+              className="field-input"
+            />
+            <button type="button" onClick={handleCreateProject} className="button-primary">
+              Add
+            </button>
+          </div>
+
+          {error && <p className="error-text" style={{ marginBottom: '0.75rem' }}>{error}</p>}
+
+          <div className="dashboard-list">
+            {projects.length === 0 ? (
+              <p className="dashboard-card-copy">No projects yet. Add your first deployment target to get started.</p>
+            ) : (
+              projects.map((p) => (
+                <div key={p.id} className="dashboard-item">
+                  <div className="dashboard-item-meta">
+                    <strong>{p.name}</strong>
+                    <span>{p.target_url}</span>
+                  </div>
+                  <div className="dashboard-item-actions">
+                    <a href={`/?projectId=${p.id}&url=${encodeURIComponent(p.target_url)}`} className="button-ghost">
+                      Scan
+                    </a>
+                    <button type="button" onClick={() => handleDelete(p.id)} className="button-ghost" style={{ color: 'var(--critical)' }}>
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        <div className="dashboard-card fade-up">
+          <div className="dashboard-card-header">
+            <div>
+              <h2 className="dashboard-card-title">Recent scans</h2>
+              <p className="dashboard-card-copy">Monitor queue activity and spot low-scoring deployments quickly.</p>
+            </div>
+            <span className="status-pill">{activeCount} active</span>
+          </div>
+
+          <div className="dashboard-list">
+            {recentScans.length === 0 ? (
+              <p className="dashboard-card-copy">No scans yet.</p>
+            ) : (
+              recentScans.map((scan) => (
+                <div key={scan.id} className="dashboard-item">
+                  <div className="dashboard-item-meta">
+                    <strong style={{ fontFamily: 'var(--mono)' }}>{scan.target_host}</strong>
+                    <span>{scan.id}</span>
+                  </div>
+                  <div className="dashboard-item-actions">
+                    <span className="status-pill">{scan.status}</span>
+                    {scan.score !== null && (
+                      <span
+                        className="score-pill"
+                        style={{
+                          color: scan.score >= 80 ? 'var(--success)' : scan.score >= 50 ? 'var(--medium)' : 'var(--critical)',
+                        }}
+                      >
+                        {scan.score}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
       </section>
     </div>
   );
 }
-
-const cardStyle: React.CSSProperties = {
-  background: 'var(--bg-card)',
-  border: '1px solid var(--border)',
-  borderRadius: 'var(--radius)',
-  padding: '1.5rem',
-};
-
-const inputStyle: React.CSSProperties = {
-  flex: 1,
-  padding: '0.5rem 0.75rem',
-  background: 'var(--bg)',
-  border: '1px solid var(--border)',
-  borderRadius: 'var(--radius)',
-  color: 'var(--text)',
-  fontSize: '0.85rem',
-};
-
-const btnStyle: React.CSSProperties = {
-  padding: '0.5rem 1rem',
-  background: 'var(--accent)',
-  color: '#fff',
-  border: 'none',
-  borderRadius: 'var(--radius)',
-  fontSize: '0.85rem',
-  cursor: 'pointer',
-};
-
-const linkBtn: React.CSSProperties = {
-  background: 'none',
-  border: 'none',
-  color: 'var(--accent)',
-  cursor: 'pointer',
-  fontSize: '0.8rem',
-  textDecoration: 'none',
-};

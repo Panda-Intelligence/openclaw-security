@@ -1,4 +1,3 @@
-
 import { createCheckout, isLoggedIn } from '../lib/api';
 
 const plans = [
@@ -32,65 +31,30 @@ export default function PricingPage() {
   };
 
   return (
-    <div style={{ maxWidth: 700, margin: '3rem auto', textAlign: 'center' }}>
-      <h1 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '0.5rem' }}>Pricing</h1>
-      <p style={{ color: 'var(--text-muted)', marginBottom: '2.5rem' }}>Audit your OpenClaw deployments with confidence</p>
+    <div className="page-narrow">
+      <div className="page-header" style={{ margin: '2rem 0 2.5rem', textAlign: 'center' }}>
+        <h1 style={{ fontSize: '3rem' }}>Pricing</h1>
+        <p>Choose the scan depth, quotas, and workflow speed that fit your deployment cadence.</p>
+      </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+      <div className="pricing-grid">
         {plans.map((plan) => (
-          <div
-            key={plan.tier}
-            style={{
-              background: 'var(--bg-card)',
-              border: `1px solid ${plan.highlighted ? 'var(--accent)' : 'var(--border)'}`,
-              borderRadius: 'var(--radius)',
-              padding: '2rem 1.5rem',
-              position: 'relative',
-            }}
-          >
-            {plan.highlighted && (
-              <span
-                style={{
-                  position: 'absolute',
-                  top: -12,
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  background: 'var(--accent)',
-                  color: '#fff',
-                  fontSize: '0.7rem',
-                  fontWeight: 600,
-                  padding: '2px 12px',
-                  borderRadius: 12,
-                }}
-              >
-                RECOMMENDED
-              </span>
-            )}
-            <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>{plan.name}</h2>
-            <p style={{ fontSize: '2rem', fontWeight: 700, margin: '0.75rem 0' }}>{plan.price}</p>
-            <ul style={{ listStyle: 'none', padding: 0, marginBottom: '1.5rem', textAlign: 'left' }}>
-              {plan.features.map((f) => (
-                <li key={f} style={{ padding: '0.3rem 0', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-                  {f}
-                </li>
+          <div key={plan.tier} className={`pricing-card fade-up${plan.highlighted ? ' pricing-card--highlighted' : ''}`}>
+            {plan.highlighted && <span className="pricing-badge">Recommended</span>}
+            <h2>{plan.name}</h2>
+            <div className="pricing-price">{plan.price}</div>
+            <ul className="pricing-list">
+              {plan.features.map((feature) => (
+                <li key={feature}>• {feature}</li>
               ))}
             </ul>
             <button
               type="button"
               onClick={() => handleCheckout(plan.tier)}
-              style={{
-                width: '100%',
-                padding: '0.75rem',
-                background: plan.highlighted ? 'var(--accent)' : 'var(--bg)',
-                color: plan.highlighted ? '#fff' : 'var(--text)',
-                border: `1px solid ${plan.highlighted ? 'var(--accent)' : 'var(--border)'}`,
-                borderRadius: 'var(--radius)',
-                fontSize: '0.95rem',
-                fontWeight: 600,
-                cursor: 'pointer',
-              }}
+              className={plan.highlighted ? 'button-primary' : 'button-secondary'}
+              style={{ width: '100%' }}
             >
-              {plan.tier === 'free' ? 'Get Started' : 'Subscribe'}
+              {plan.tier === 'free' ? 'Get started' : 'Subscribe'}
             </button>
           </div>
         ))}

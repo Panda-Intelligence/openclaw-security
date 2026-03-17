@@ -8,12 +8,13 @@ import { reportRoutes } from './api/reports';
 import { scanRoutes } from './api/scans';
 import { rateLimit } from './middleware/rate-limit';
 import { handleScanQueue } from './queue/scan-consumer';
+import { ensureAppSchema, SchemaMigrationRequiredError } from './state/bootstrap';
 import { getAuthUser } from './utils/auth';
 
 export interface Env {
   DB: D1Database;
   SCAN_QUEUE: Queue;
-  ASSETS: Fetcher;
+  ASSETS?: Fetcher;
   JWT_SECRET?: string;
   GOOGLE_CLIENT_ID: string;
   GOOGLE_CLIENT_SECRET: string;
@@ -29,6 +30,11 @@ export interface Env {
 type Variables = { userId: string };
 
 const app = new Hono<{ Bindings: Env; Variables: Variables }>();
+
+function isLocalDevelopmentRequest(request: Request): boolean {
+  const { hostname } = new URL(request.url);
+  return hostname === 'localhost' || hostname === '127.0.0.1' || hostname.endsWith('.localhost');
+}
 
 // CORS
 app.use(
@@ -50,6 +56,34 @@ app.use(
 // Health
 app.get('/health', (c) => c.json({ status: 'ok', service: 'openclaw-security' }));
 
+app.get('/robots.txt', (c) => {
+  const origin = new URL(c.req.url).origin;
+  return c.text(`User-agent: *\nAllow: /\nSitemap: ${origin}/sitemap.xml\n`);
+});
+
+app.get('/sitemap.xml', (c) => {
+  const origin = new URL(c.req.url).origin;
+  const routes = [
+    '/',
+    '/pricing',
+    '/community',
+    '/intel',
+    '/blog',
+    '/blog/welcome',
+    '/blog/top-10-misconfigurations',
+    '/blog/cors-deep-dive',
+    '/blog/marketplace-skills-security',
+    '/blog/openclaw-release-dependency-watch',
+    '/blog/llm-runtime-security-checklist',
+    '/auth/login',
+  ];
+  const body = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${routes.map((route) => `  <url><loc>${origin}${route}</loc></url>`).join('\n')}
+</urlset>`;
+  return c.text(body, 200, { 'Content-Type': 'application/xml; charset=utf-8' });
+});
+
 // Rate limiting on sensitive endpoints
 app.use('/api/auth/*', rateLimit({ limit: 15, windowMs: 60_000, keyPrefix: 'auth' }));
 app.use('/api/billing/webhook', rateLimit({ limit: 100, windowMs: 60_000, keyPrefix: 'webhook' }));
@@ -57,6 +91,27 @@ app.use('/api/scans', rateLimit({ limit: 20, windowMs: 60_000, keyPrefix: 'scans
 app.use('/api/community', rateLimit({ limit: 30, windowMs: 60_000, keyPrefix: 'community' }));
 
 // Public routes (before auth middleware)
+app.use('/api/*', async (c, next) => {
+  try {
+    await ensureAppSchema(c.env.DB, { allowBootstrap: isLocalDevelopmentRequest(c.req.raw) });
+  } catch (error) {
+    if (error instanceof SchemaMigrationRequiredError) {
+      return c.json(
+        {
+          success: false,
+          error: {
+            code: 'MIGRATION_REQUIRED',
+            message: error.message,
+          },
+        },
+        503,
+      );
+    }
+    throw error;
+  }
+  return next();
+});
+
 app.route('/api/auth', authRoutes);
 app.route('/api/community', communityRoutes);
 
@@ -89,6 +144,19 @@ app.route('/api/billing', billingRoutes);
 
 // SPA fallback
 app.get('*', async (c) => {
+  if (!c.env.ASSETS || typeof c.env.ASSETS.fetch !== 'function') {
+    return c.json(
+      {
+        success: false,
+        error: {
+          code: 'ASSETS_BINDING_MISSING',
+          message: 'Static asset binding "ASSETS" is not configured.',
+        },
+      },
+      500,
+    );
+  }
+
   const url = new URL(c.req.url);
   const assetResp = await c.env.ASSETS.fetch(c.req.raw);
   if (assetResp.status !== 404) return assetResp;

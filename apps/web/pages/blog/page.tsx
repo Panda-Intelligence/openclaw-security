@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { blogPosts } from './meta';
 
 const postModules = import.meta.glob('./posts/*.md', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
@@ -14,18 +14,97 @@ const categoryColors: Record<string, string> = {
   research: '#f97316',
 };
 
+function getSlugFromPath(): string | null {
+  const match = window.location.pathname.match(/^\/blog\/([^/]+)$/);
+  return match?.[1] ?? null;
+}
+
+function applyBlogSeo(post: (typeof blogPosts)[number] | null): void {
+  const title = post ? `${post.title} · OpenClaw Security Audit` : 'Blog · OpenClaw Security Audit';
+  const description = post
+    ? `${post.subtitle} Focused on OpenClaw security, audit workflows, marketplace skills, dependencies, and LLM runtime safety.`
+    : 'Research, guides, and operator notes focused on OpenClaw security, audit workflows, and AI runtime risks.';
+
+  document.title = title;
+  const set = (selector: string, attr: 'content' | 'href', value: string) => {
+    const node = document.head.querySelector(selector);
+    if (node) node.setAttribute(attr, value);
+  };
+  set('meta[name="description"]', 'content', description);
+  set('meta[property="og:title"]', 'content', title);
+  set('meta[property="og:description"]', 'content', description);
+  set('meta[name="twitter:title"]', 'content', title);
+  set('meta[name="twitter:description"]', 'content', description);
+  set('link[rel="canonical"]', 'href', window.location.href);
+
+  const scriptId = 'blog-structured-data';
+  let script = document.getElementById(scriptId) as HTMLScriptElement | null;
+  if (!script) {
+    script = document.createElement('script');
+    script.id = scriptId;
+    script.type = 'application/ld+json';
+    document.head.appendChild(script);
+  }
+
+  script.textContent = JSON.stringify(
+    post
+      ? {
+          '@context': 'https://schema.org',
+          '@type': 'BlogPosting',
+          headline: post.title,
+          description,
+          datePublished: post.date,
+          keywords: ['openclaw security', 'openclaw audit', post.category],
+          url: window.location.href,
+        }
+      : {
+          '@context': 'https://schema.org',
+          '@type': 'Blog',
+          name: 'OpenClaw Security Audit Blog',
+          description,
+          url: window.location.href,
+        },
+  );
+}
+
 export default function BlogPage() {
-  const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
+  const [selectedSlug, setSelectedSlug] = useState<string | null>(getSlugFromPath());
   const selectedPost = selectedSlug ? blogPosts.find((p) => p.slug === selectedSlug) : null;
   const content = selectedSlug ? getPostContent(selectedSlug) : null;
 
+  useEffect(() => {
+    applyBlogSeo(selectedPost ?? null);
+    const sync = () => {
+      const slug = getSlugFromPath();
+      setSelectedSlug(slug);
+      const post = slug ? blogPosts.find((p) => p.slug === slug) ?? null : null;
+      applyBlogSeo(post);
+    };
+    window.addEventListener('popstate', sync);
+    return () => window.removeEventListener('popstate', sync);
+  }, [selectedPost]);
+
+  const openPost = (slug: string) => {
+    window.history.pushState({}, '', `/blog/${slug}`);
+    setSelectedSlug(slug);
+    const post = blogPosts.find((entry) => entry.slug === slug) ?? null;
+    applyBlogSeo(post);
+  };
+
+  const closePost = () => {
+    window.history.pushState({}, '', '/blog');
+    setSelectedSlug(null);
+    applyBlogSeo(null);
+  };
+
   if (selectedPost && content) {
     return (
-      <div style={{ maxWidth: 720, margin: '0 auto' }}>
+      <div className="page-narrow">
         <button
           type="button"
-          onClick={() => setSelectedSlug(null)}
-          style={{ background: 'none', border: 'none', color: 'var(--accent)', cursor: 'pointer', marginBottom: '1.5rem', fontSize: '0.9rem' }}
+          onClick={closePost}
+          className="button-ghost"
+          style={{ marginBottom: '1.5rem' }}
         >
           &larr; Back to blog
         </button>
@@ -34,7 +113,7 @@ export default function BlogPage() {
           <span style={{ color: categoryColors[selectedPost.category] }}>{selectedPost.category}</span>
         </p>
         <article
-          style={{ lineHeight: 1.7, color: 'var(--text)' }}
+          className="blog-prose fade-up"
           // biome-ignore lint/security/noDangerouslySetInnerHtml: content is HTML-escaped before markdown conversion
           dangerouslySetInnerHTML={{ __html: markdownToHtml(content) }}
         />
@@ -43,25 +122,20 @@ export default function BlogPage() {
   }
 
   return (
-    <div style={{ maxWidth: 720, margin: '0 auto' }}>
-      <h1 style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: '0.5rem' }}>Blog</h1>
-      <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>Security insights for AI agent infrastructure</p>
+    <div className="page-narrow">
+      <div className="page-header">
+        <h1 style={{ fontSize: '2.8rem' }}>Blog</h1>
+        <p>Security insights for AI agent infrastructure</p>
+      </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <div className="blog-list">
         {blogPosts.map((post) => (
           <article
             key={post.slug}
-            onClick={() => setSelectedSlug(post.slug)}
-            style={{
-              background: 'var(--bg-card)',
-              border: '1px solid var(--border)',
-              borderRadius: 'var(--radius)',
-              padding: '1.25rem',
-              cursor: 'pointer',
-              transition: 'border-color 0.15s',
-            }}
+            onClick={() => openPost(post.slug)}
+            className="blog-card fade-up"
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+            <div className="blog-meta">
               <span style={{ fontSize: '0.75rem', fontWeight: 600, color: categoryColors[post.category], textTransform: 'uppercase' }}>
                 {post.category}
               </span>

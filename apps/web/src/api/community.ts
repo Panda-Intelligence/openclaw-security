@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { getIntelligenceOverview } from '../intelligence';
 import type { Env } from '../worker';
 import { validateBody, communityReportSchema } from '../middleware/validate';
 
@@ -122,4 +123,29 @@ communityRoutes.get('/leaderboard', async (c) => {
   ).all();
 
   return c.json({ success: true, data: result.results });
+});
+
+// GET /api/community/intelligence — public OpenClaw security intelligence board
+communityRoutes.get('/intelligence', (c) => {
+  return c.json({ success: true, data: getIntelligenceOverview() });
+});
+
+communityRoutes.get('/intelligence/releases', (c) => {
+  return c.json({ success: true, data: getIntelligenceOverview().releases });
+});
+
+communityRoutes.get('/intelligence/skills', (c) => {
+  return c.json({ success: true, data: getIntelligenceOverview().marketplaceSkills });
+});
+
+communityRoutes.get('/intelligence/install', (c) => {
+  return c.json({ success: true, data: getIntelligenceOverview().installHardening });
+});
+
+communityRoutes.get('/intelligence/llm', (c) => {
+  return c.json({ success: true, data: getIntelligenceOverview().llmSecurity });
+});
+
+communityRoutes.get('/intelligence/gateway', (c) => {
+  return c.json({ success: true, data: getIntelligenceOverview().gatewayHardening });
 });

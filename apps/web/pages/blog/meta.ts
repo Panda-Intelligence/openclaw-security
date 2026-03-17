@@ -32,4 +32,28 @@ export const blogPosts: BlogPost[] = [
     category: 'guide',
     readingMinutes: 6,
   },
+  {
+    slug: 'marketplace-skills-security',
+    title: 'Marketplace Skills Security for OpenClaw',
+    subtitle: 'How to audit public skills, local overrides, and execution trust boundaries',
+    date: '2026-03-17',
+    category: 'research',
+    readingMinutes: 7,
+  },
+  {
+    slug: 'openclaw-release-dependency-watch',
+    title: 'OpenClaw Release & Dependency Security Watch',
+    subtitle: 'What operators should review on every version bump and package install',
+    date: '2026-03-17',
+    category: 'research',
+    readingMinutes: 7,
+  },
+  {
+    slug: 'llm-runtime-security-checklist',
+    title: 'LLM Runtime Security Checklist for OpenClaw',
+    subtitle: 'Prompt leakage, tool overreach, and provider drift in real agent deployments',
+    date: '2026-03-17',
+    category: 'guide',
+    readingMinutes: 6,
+  },
 ];

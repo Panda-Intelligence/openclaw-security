@@ -91,6 +91,47 @@ export interface ProjectRecord {
   created_at: string;
 }
 
+export interface CommunityReportRecord {
+  id: string;
+  target_host: string;
+  score: number;
+  severity_counts: Record<Severity | string, number>;
+  finding_count: number;
+  platform_version: string | null;
+  uploaded_at: string;
+}
+
+export interface IntelligenceSource {
+  label: string;
+  url: string;
+  note: string;
+  capturedAt: string;
+}
+
+export interface IntelligenceBoardItem {
+  name: string;
+  risk: 'low' | 'medium' | 'high' | 'critical';
+  summary: string;
+  signal: string;
+}
+
+export interface ReleaseWatchItem {
+  version: string;
+  date: string;
+  posture: string;
+  summary: string;
+}
+
+export interface IntelligenceOverview {
+  capturedAt: string;
+  sources: IntelligenceSource[];
+  marketplaceSkills: IntelligenceBoardItem[];
+  releases: ReleaseWatchItem[];
+  installHardening: IntelligenceBoardItem[];
+  llmSecurity: IntelligenceBoardItem[];
+  gatewayHardening: IntelligenceBoardItem[];
+}
+
 // ── API fetch ──
 
 async function apiFetch<T>(path: string, options?: RequestInit): Promise<ApiResponse<T>> {
@@ -162,3 +203,9 @@ export const createCheckout = (plan: string) =>
 
 export const getBillingPortal = () =>
   apiFetch<{ url: string }>('/billing/portal', { method: 'POST' });
+
+export const getIntelligenceOverview = () =>
+  apiFetch<IntelligenceOverview>('/community/intelligence');
+
+export const getCommunityReports = (limit = 6) =>
+  apiFetch<CommunityReportRecord[]>(`/community?limit=${limit}`);

@@ -11,18 +11,8 @@ export function ScoreGauge({ score }: Props) {
   const offset = circumference - (score / 100) * circumference;
 
   return (
-    <div
-      style={{
-        background: 'var(--bg-card)',
-        border: '1px solid var(--border)',
-        borderRadius: 'var(--radius)',
-        padding: '1.25rem',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
+    <div className="score-gauge fade-up">
+      <span className="score-caption">Overall score</span>
       <svg width="120" height="120" viewBox="0 0 120 120">
         <circle cx="60" cy="60" r="45" fill="none" stroke="var(--border)" strokeWidth="8" />
         <circle
@@ -45,6 +35,7 @@ export function ScoreGauge({ score }: Props) {
           {label}
         </text>
       </svg>
+      <span className="score-caption">Penalty based</span>
     </div>
   );
 }

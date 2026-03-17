@@ -8,43 +8,18 @@ interface Props {
 
 export function PairFlow({ jwt, onJwtChange, onClose }: Props) {
   return (
-    <div
-      style={{
-        marginTop: '1rem',
-        padding: '1rem',
-        background: 'var(--bg)',
-        border: '1px solid var(--border)',
-        borderRadius: 'var(--radius)',
-      }}
-    >
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '0.75rem',
-        }}
-      >
+    <div className="pair-panel">
+      <div className="pair-header">
         <h3 style={{ fontSize: '0.95rem', fontWeight: 600 }}>Deep Scan Authorization</h3>
-        <button
-          type="button"
-          onClick={onClose}
-          style={{
-            background: 'none',
-            border: 'none',
-            color: 'var(--text-muted)',
-            cursor: 'pointer',
-            fontSize: '1.1rem',
-          }}
-        >
+        <button type="button" onClick={onClose} className="pair-close">
           x
         </button>
       </div>
 
-      <ol style={{ fontSize: '0.85rem', color: 'var(--text-muted)', paddingLeft: '1.25rem', marginBottom: '1rem' }}>
-        <li style={{ marginBottom: '0.25rem' }}>Open your OpenClaw Console in another tab</li>
-        <li style={{ marginBottom: '0.25rem' }}>Open browser DevTools (F12) → Console</li>
-        <li style={{ marginBottom: '0.25rem' }}>
+      <ol className="pair-list">
+        <li>Open your OpenClaw Console in another tab</li>
+        <li>Open browser DevTools (F12) → Console</li>
+        <li>
           Run: <code style={{ fontFamily: 'var(--mono)', color: 'var(--accent)' }}>localStorage.getItem('jwt')</code>
         </li>
         <li>Paste the token below</li>
@@ -55,17 +30,8 @@ export function PairFlow({ jwt, onJwtChange, onClose }: Props) {
         onChange={(e) => onJwtChange(e.target.value)}
         placeholder="eyJhbGciOiJIUzI1NiIs..."
         rows={3}
-        style={{
-          width: '100%',
-          padding: '0.5rem',
-          background: 'var(--bg-card)',
-          border: '1px solid var(--border)',
-          borderRadius: '4px',
-          color: 'var(--text)',
-          fontFamily: 'var(--mono)',
-          fontSize: '0.8rem',
-          resize: 'vertical',
-        }}
+        className="field-textarea"
+        style={{ resize: 'vertical' }}
       />
 
       <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>

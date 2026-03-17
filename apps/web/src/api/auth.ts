@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import type { Env } from '../worker';
 import { signJwt } from '../utils/jwt';
-import { ensureUser } from '../utils/auth';
+import { ensureUser, getAuthUser } from '../utils/auth';
 
 export const authRoutes = new Hono<{ Bindings: Env; Variables: { userId: string } }>();
 
@@ -178,7 +178,15 @@ authRoutes.get('/github/callback', async (c) => {
 // ── Me ──
 
 authRoutes.get('/me', async (c) => {
-  const userId = c.get('userId');
+  let userId = c.get('userId');
+  if (!userId) {
+    const user = await getAuthUser(c.req.raw, c.env);
+    if (!user) {
+      return c.json({ success: false, error: 'Authentication required' }, 401);
+    }
+    userId = user.userId;
+  }
+
   const user = await c.env.DB.prepare(`SELECT * FROM users WHERE id = ?`).bind(userId).first();
   const sub = await c.env.DB.prepare(
     `SELECT * FROM subscriptions WHERE user_id = ? ORDER BY created_at DESC LIMIT 1`,

@@ -12,43 +12,35 @@ export function ReportView({ report, onReset }: Props) {
   const findings = report.findings ?? [];
   const severityCounts = report.severity_counts ?? {};
   const score = report.score ?? 100;
+  const visibleSeverities = (Object.entries(severityCounts) as [Severity, number][])
+    .filter(([, count]) => count > 0);
 
   return (
-    <div>
+    <div className="page-medium">
       <div
         style={{
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
+          gap: '1rem',
           marginBottom: '2rem',
+          flexWrap: 'wrap',
         }}
       >
-        <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>Security Report</h2>
+        <div className="page-header" style={{ marginBottom: 0 }}>
+          <h1 style={{ fontSize: '2.4rem' }}>Security Report</h1>
+          <p>Severity, evidence, and recommendations for {report.target_url}</p>
+        </div>
         <button
           type="button"
           onClick={onReset}
-          style={{
-            padding: '0.5rem 1rem',
-            background: 'var(--bg-card)',
-            border: '1px solid var(--border)',
-            borderRadius: 'var(--radius)',
-            color: 'var(--text)',
-            cursor: 'pointer',
-            fontSize: '0.85rem',
-          }}
+          className="button-secondary"
         >
           New Scan
         </button>
       </div>
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '200px 1fr',
-          gap: '1.5rem',
-          marginBottom: '2rem',
-        }}
-      >
+      <div className="report-grid" style={{ marginBottom: '2rem' }}>
         <ScoreGauge score={score} />
 
         <div
@@ -73,25 +65,35 @@ export function ReportView({ report, onReset }: Props) {
           )}
 
           <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
-            {(Object.entries(severityCounts) as [Severity, number][])
-              .filter(([, count]) => count > 0)
-              .map(([severity, count]) => (
-                <span
-                  key={severity}
-                  style={{
-                    padding: '0.25rem 0.75rem',
-                    borderRadius: '20px',
-                    fontSize: '0.8rem',
-                    fontWeight: 600,
-                    background: `var(--${severity})`,
-                    color: '#fff',
-                    opacity: 0.9,
-                  }}
-                >
-                  {count} {severity}
-                </span>
-              ))}
+            {visibleSeverities.map(([severity, count]) => (
+              <span
+                key={severity}
+                className="severity-pill"
+                style={{
+                  background: `var(--${severity})`,
+                  fontSize: '0.8rem',
+                  padding: '0.38rem 0.74rem',
+                }}
+              >
+                {count} {severity}
+              </span>
+            ))}
           </div>
+        </div>
+      </div>
+
+      <div className="dashboard-summary fade-up" style={{ marginBottom: '1.5rem' }}>
+        <div className="dashboard-summary-card">
+          <strong>{findings.length}</strong>
+          <span>Total findings</span>
+        </div>
+        <div className="dashboard-summary-card">
+          <strong>{report.mode}</strong>
+          <span>Scan mode</span>
+        </div>
+        <div className="dashboard-summary-card">
+          <strong>{visibleSeverities[0]?.[0] ?? 'clean'}</strong>
+          <span>Highest visible severity</span>
         </div>
       </div>
 
@@ -111,7 +113,7 @@ export function ReportView({ report, onReset }: Props) {
           All checks passed — no issues found.
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        <div className="findings-list">
           {findings.map((f: FindingRecord) => (
             <FindingCard key={f.id} finding={f} />
           ))}

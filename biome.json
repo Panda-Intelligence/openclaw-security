@@ -44,6 +44,7 @@
     }
   },
   "files": {
-    "includes": ["packages/**/*.ts", "packages/**/*.tsx", "apps/**/src/**", "apps/**/pages/**", "apps/**/tests/**"]
+    "includes": ["packages/**/*.ts", "packages/**/*.tsx", "apps/**/src/**", "apps/**/pages/**", "apps/**/tests/**"],
+    "ignore": ["**/index.html"]
   }
 }
