@@ -38,9 +38,9 @@ STRIPE_PRICE_STARTER = ""
 name = "openclaw-security-web"
 
 [env.production.vars]
-GOOGLE_CLIENT_ID = ""
+GOOGLE_CLIENT_ID = "892178929987-n3m0nlgl5aki03tl4tjt5gbpi5rvkr93.apps.googleusercontent.com"
 GOOGLE_REDIRECT_URI = "https://openclawsecurity.io/api/auth/google/callback"
-GITHUB_CLIENT_ID = ""
+GITHUB_CLIENT_ID = "Ov23lifEER7FQ6IT52Ii"
 GITHUB_REDIRECT_URI = "https://openclawsecurity.io/api/auth/github/callback"
 STRIPE_PRICE_STARTER = ""
 
@@ -63,9 +63,9 @@ max_retries = 2
 name = "openclaw-security-web-staging"
 
 [env.staging.vars]
-GOOGLE_CLIENT_ID = ""
+GOOGLE_CLIENT_ID = "892178929987-n3m0nlgl5aki03tl4tjt5gbpi5rvkr93.apps.googleusercontent.com"
 GOOGLE_REDIRECT_URI = "https://staging.openclawsecurity.io/api/auth/google/callback"
-GITHUB_CLIENT_ID = ""
+GITHUB_CLIENT_ID = "Ov23lifEER7FQ6IT52Ii"
 GITHUB_REDIRECT_URI = "https://staging.openclawsecurity.io/api/auth/github/callback"
 STRIPE_PRICE_STARTER = ""
 
