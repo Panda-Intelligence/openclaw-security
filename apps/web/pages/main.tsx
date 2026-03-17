@@ -78,8 +78,8 @@ function applySeo(route: Route, report?: ReportData | null): void {
     },
     intel: {
       title: 'OpenClaw Security Audit Intelligence',
-      description: 'Public intelligence board for marketplace skills, release and dependency security, install hardening, and LLM safety in OpenClaw.',
-      keywords: 'openclaw security audit intelligence, openclaw marketplace skills security, openclaw dependency security, llm security audit',
+      description: 'Public OpenClaw security audit intelligence covering marketplace skills, dependency and release posture, installation hardening, gateway exposure, and LLM runtime safety.',
+      keywords: 'openclaw security audit, openclaw security intelligence, openclaw marketplace skills security, openclaw dependency audit, openclaw install security, llm security audit',
     },
   };
 
@@ -159,7 +159,7 @@ function applySeo(route: Route, report?: ReportData | null): void {
       name: meta.title,
       description: meta.description,
       url: window.location.href,
-      about: ['OpenClaw Security', 'Marketplace skills security', 'LLM security audit'],
+      about: ['OpenClaw Security', 'Marketplace skills security', 'OpenClaw dependency audit', 'LLM security audit'],
     },
   };
 
@@ -296,8 +296,8 @@ function App() {
             <div>
               <h3 className="site-footer-title">Trust & links</h3>
               <div className="site-footer-links">
-                <a href="https://github.com/openclaw/openclaw-security" target="_blank" rel="noreferrer">GitHub</a>
-                <a href="https://github.com/openclaw/openclaw-security/blob/main/SECURITY.md" target="_blank" rel="noreferrer">Security policy</a>
+                <a href="https://github.com/Panda-Intelligence/openclaw-security" target="_blank" rel="noreferrer">GitHub</a>
+                <a href="https://github.com/Panda-Intelligence/openclaw-security/blob/main/SECURITY.md" target="_blank" rel="noreferrer">Security policy</a>
                 <span>Marketplace skills security</span>
                 <span>LLM runtime safety</span>
               </div>

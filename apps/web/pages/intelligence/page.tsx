@@ -11,6 +11,32 @@ const sectionAnchors = [
   { id: 'official-sources', label: 'Sources' },
 ] as const;
 
+const researchPillars = [
+  {
+    title: 'Marketplace skill trust',
+    copy: 'Track how public skill distribution, local overrides, and plugin-shipped behaviors affect OpenClaw audit scope.',
+  },
+  {
+    title: 'Release & dependency posture',
+    copy: 'Keep release cadence, dependency-sensitive changes, and security-heavy rollout notes visible for operators and buyers.',
+  },
+  {
+    title: 'Installation hardening',
+    copy: 'Surface the setup decisions that most strongly change baseline OpenClaw security before runtime even begins.',
+  },
+  {
+    title: 'LLM runtime boundaries',
+    copy: 'Map where prompt leakage, tool overreach, and gateway exposure create the biggest OpenClaw audit signals.',
+  },
+] as const;
+
+const methodologySteps = [
+  'Use official OpenClaw docs and release notes as the primary source of truth.',
+  'Translate platform changes into operator-facing audit signals rather than generic security headlines.',
+  'Prioritize skills, install posture, dependency behavior, and LLM runtime boundaries.',
+  'Keep every board item short, source-linked, and usable in a live OpenClaw security audit workflow.',
+] as const;
+
 function riskColor(risk: 'low' | 'medium' | 'high' | 'critical'): string {
   return `var(--${risk})`;
 }
@@ -77,6 +103,14 @@ export default function IntelligencePage() {
   const installItems = applyFilters(overview.installHardening);
   const llmItems = applyFilters(overview.llmSecurity);
   const gatewayItems = applyFilters(overview.gatewayHardening);
+  const allRiskItems = [...skillsItems, ...installItems, ...llmItems, ...gatewayItems];
+  const severitySummary = allRiskItems.reduce(
+    (acc, item) => {
+      acc[item.risk] += 1;
+      return acc;
+    },
+    { critical: 0, high: 0, medium: 0, low: 0 } as Record<'critical' | 'high' | 'medium' | 'low', number>,
+  );
   const totalVisibleSignals = skillsItems.length + installItems.length + llmItems.length + gatewayItems.length + overview.releases.length;
 
   return (
@@ -102,6 +136,53 @@ export default function IntelligencePage() {
           <strong>{overview.sources.length}</strong>
           <span>Official sources</span>
         </div>
+        <div className="dashboard-summary-card">
+          <strong>{totalVisibleSignals}</strong>
+          <span>Visible audit signals</span>
+        </div>
+      </section>
+
+      <section className="intel-overview-grid">
+        <article className="dashboard-card fade-up intel-panel">
+          <h2 className="dashboard-card-title">Why this OpenClaw security audit board matters</h2>
+          <p className="dashboard-card-copy">
+            This page is built as a public research surface for OpenClaw security, with special focus on audit-ready
+            topics: marketplace skills, release and dependency posture, installation hardening, and LLM runtime safety.
+          </p>
+          <div className="intel-severity-grid">
+            {(['critical', 'high', 'medium', 'low'] as const).map((risk) => (
+              <div key={risk} className="intel-severity-card">
+                <span className="severity-pill" style={{ background: riskColor(risk) }}>
+                  {risk}
+                </span>
+                <strong>{severitySummary[risk]}</strong>
+                <small>active signals</small>
+              </div>
+            ))}
+          </div>
+        </article>
+
+        <article className="dashboard-card fade-up intel-panel">
+          <h2 className="dashboard-card-title">Research methodology</h2>
+          <p className="dashboard-card-copy">
+            The board is optimized for operators, buyers, and reviewers who need concise OpenClaw audit context without
+            leaving the product workflow.
+          </p>
+          <ol className="intel-methodology-list">
+            {methodologySteps.map((step) => (
+              <li key={step}>{step}</li>
+            ))}
+          </ol>
+        </article>
+      </section>
+
+      <section className="intel-pillar-grid">
+        {researchPillars.map((pillar) => (
+          <article key={pillar.title} className="intel-pillar-card fade-up">
+            <h3>{pillar.title}</h3>
+            <p>{pillar.copy}</p>
+          </article>
+        ))}
       </section>
 
       <div className="intel-layout">
@@ -155,6 +236,18 @@ export default function IntelligencePage() {
                 </a>
               ))}
             </nav>
+          </section>
+
+          <section className="dashboard-card fade-up intel-sidebar-card">
+            <h2 className="dashboard-card-title">Source freshness</h2>
+            <div className="intel-freshness-list">
+              {overview.sources.slice(0, 3).map((source) => (
+                <div key={source.url} className="intel-freshness-item">
+                  <strong>{source.label}</strong>
+                  <span>Captured {source.capturedAt}</span>
+                </div>
+              ))}
+            </div>
           </section>
         </aside>
 
@@ -228,6 +321,7 @@ export default function IntelligencePage() {
                 <p>{source.note}</p>
               </div>
               <div className="intel-item-side">
+                <span className="status-pill">Captured {source.capturedAt}</span>
                 <a href={source.url} target="_blank" rel="noreferrer" className="button-secondary">
                   Open source
                 </a>

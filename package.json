@@ -3,13 +3,13 @@
   "description": "Security audit platform for OpenClaw Cloud deployments",
   "version": "0.1.0",
   "license": "MIT",
-  "homepage": "https://github.com/openclaw/openclaw-security#readme",
+  "homepage": "https://github.com/Panda-Intelligence/openclaw-security#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/openclaw/openclaw-security.git"
+    "url": "https://github.com/Panda-Intelligence/openclaw-security.git"
   },
   "bugs": {
-    "url": "https://github.com/openclaw/openclaw-security/issues"
+    "url": "https://github.com/Panda-Intelligence/openclaw-security/issues"
   },
   "keywords": [
     "security",

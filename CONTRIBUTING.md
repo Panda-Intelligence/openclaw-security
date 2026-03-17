@@ -5,7 +5,7 @@ Thanks for your interest in contributing to OpenClaw Security!
 ## Getting started
 
 ```bash
-git clone https://github.com/openclaw/openclaw-security.git
+git clone https://github.com/Panda-Intelligence/openclaw-security.git
 cd openclaw-security
 bun install
 bun test

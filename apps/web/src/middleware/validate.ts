@@ -44,6 +44,15 @@ export const checkoutSchema = z.object({
   plan: z.enum(['starter'], { message: 'Invalid plan' }),
 });
 
+export const createPairingSchema = z.object({
+  projectId: z.string().uuid('Invalid projectId'),
+  token: z.string().min(10, 'Token is required'),
+});
+
+export const refreshPairingSchema = z.object({
+  token: z.string().min(10, 'Token is required'),
+});
+
 export const communityReportSchema = z.object({
   targetHost: z.string().min(1, 'targetHost is required'),
   score: z.number().int().min(0).max(100),

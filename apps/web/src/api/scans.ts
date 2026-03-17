@@ -4,6 +4,9 @@ import { handleScanQueue } from '../queue/scan-consumer';
 import { validateBody, createScanSchema } from '../middleware/validate';
 import { PLAN_LIMITS } from '../types';
 import type { PlanTier } from '../types';
+import { decrypt } from '../utils/crypto';
+
+const DEV_ENCRYPTION_KEY = 'a'.repeat(64);
 
 export const scanRoutes = new Hono<{ Bindings: Env; Variables: { userId: string; validatedBody: unknown } }>();
 
@@ -59,6 +62,46 @@ scanRoutes.post('/', validateBody(createScanSchema), async (c) => {
   const id = crypto.randomUUID();
   const mode = body.mode === 'active' ? 'active' : 'passive';
 
+  // Resolve JWT: from body, or from paired instance credential
+  let jwt = body.jwt;
+
+  if (mode === 'active' && !jwt && body.projectId) {
+    // Auto-resolve from pairing
+    const pairing = await c.env.DB.prepare(
+      `SELECT id, encrypted_token, iv, expires_at FROM pairings WHERE project_id = ? AND status = 'active' LIMIT 1`,
+    )
+      .bind(body.projectId)
+      .first();
+
+    if (pairing) {
+      // Check expiry
+      const expiresAt = pairing['expires_at'] as string | null;
+      if (expiresAt && new Date(expiresAt) < new Date()) {
+        await c.env.DB.prepare(
+          `UPDATE pairings SET status = 'expired', updated_at = datetime('now') WHERE id = ?`,
+        ).bind(pairing['id'] as string).run();
+        return c.json({ success: false, error: 'Paired token has expired. Please refresh the pairing.' }, 422);
+      }
+
+      // Decrypt
+      const key = c.env.PAIRING_ENCRYPTION_KEY ?? DEV_ENCRYPTION_KEY;
+      try {
+        jwt = await decrypt(pairing['encrypted_token'] as string, pairing['iv'] as string, key);
+      } catch {
+        return c.json({ success: false, error: 'Failed to decrypt pairing credential' }, 500);
+      }
+
+      // Update last_used_at
+      await c.env.DB.prepare(
+        `UPDATE pairings SET last_used_at = datetime('now'), updated_at = datetime('now') WHERE id = ?`,
+      ).bind(pairing['id'] as string).run();
+    }
+  }
+
+  if (mode === 'active' && !jwt) {
+    return c.json({ success: false, error: 'Active scan requires a JWT. Pair your project or provide a token.' }, 400);
+  }
+
   await c.env.DB.prepare(
     `INSERT INTO scans (id, target_url, target_host, mode, status, user_id, project_id, created_at)
      VALUES (?, ?, ?, ?, 'pending', ?, ?, datetime('now'))`,
@@ -68,9 +111,9 @@ scanRoutes.post('/', validateBody(createScanSchema), async (c) => {
 
   // Enqueue scan job, or run inline if Queue is unavailable (local dev)
   try {
-    await c.env.SCAN_QUEUE.send({ scanId: id, jwt: body.jwt });
+    await c.env.SCAN_QUEUE.send({ scanId: id, jwt });
   } catch {
-    handleScanQueue({ scanId: id, jwt: body.jwt }, c.env).catch(() => {});
+    handleScanQueue({ scanId: id, jwt }, c.env).catch(() => {});
   }
 
   return c.json({ success: true, data: { id, status: 'pending', targetUrl: url.toString(), mode } }, 201);

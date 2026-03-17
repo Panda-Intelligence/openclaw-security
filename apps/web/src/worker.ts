@@ -3,6 +3,7 @@ import { cors } from 'hono/cors';
 import { authRoutes } from './api/auth';
 import { billingRoutes } from './api/billing';
 import { communityRoutes } from './api/community';
+import { pairingRoutes } from './api/pairings';
 import { projectRoutes } from './api/projects';
 import { reportRoutes } from './api/reports';
 import { scanRoutes } from './api/scans';
@@ -25,6 +26,7 @@ export interface Env {
   STRIPE_SECRET_KEY: string;
   STRIPE_WEBHOOK_SECRET: string;
   STRIPE_PRICE_STARTER: string;
+  PAIRING_ENCRYPTION_KEY?: string;
 }
 
 type Variables = { userId: string };
@@ -89,6 +91,7 @@ app.use('/api/auth/*', rateLimit({ limit: 15, windowMs: 60_000, keyPrefix: 'auth
 app.use('/api/billing/webhook', rateLimit({ limit: 100, windowMs: 60_000, keyPrefix: 'webhook' }));
 app.use('/api/scans', rateLimit({ limit: 20, windowMs: 60_000, keyPrefix: 'scans' }));
 app.use('/api/community', rateLimit({ limit: 30, windowMs: 60_000, keyPrefix: 'community' }));
+app.use('/api/pairings/*', rateLimit({ limit: 20, windowMs: 60_000, keyPrefix: 'pairings' }));
 
 // Public routes (before auth middleware)
 app.use('/api/*', async (c, next) => {
@@ -140,6 +143,7 @@ app.use('/api/*', async (c, next) => {
 app.route('/api/scans', scanRoutes);
 app.route('/api/reports', reportRoutes);
 app.route('/api/projects', projectRoutes);
+app.route('/api/pairings', pairingRoutes);
 app.route('/api/billing', billingRoutes);
 
 // SPA fallback

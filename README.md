@@ -1,6 +1,6 @@
 # OpenClaw Security
 
-[![CI](https://github.com/openclaw/openclaw-security/actions/workflows/ci.yml/badge.svg)](https://github.com/openclaw/openclaw-security/actions/workflows/ci.yml)
+[![CI](https://github.com/Panda-Intelligence/openclaw-security/actions/workflows/ci.yml/badge.svg)](https://github.com/Panda-Intelligence/openclaw-security/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-blue)](tsconfig.base.json)
 
