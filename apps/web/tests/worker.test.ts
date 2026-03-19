@@ -128,7 +128,7 @@ describe('worker asset fallback', () => {
       success: false,
       error: {
         code: 'MIGRATION_REQUIRED',
-        message: 'Database schema is missing. Run the D1 migrations before serving requests. Expected schema version 2026.03.17.1.',
+        message: 'Database schema is missing. Run the D1 migrations before serving requests. Expected schema version 2026.03.17.2.',
       },
     });
   });

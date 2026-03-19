@@ -44,7 +44,14 @@
     }
   },
   "files": {
-    "includes": ["packages/**/*.ts", "packages/**/*.tsx", "apps/**/src/**", "apps/**/pages/**", "apps/**/tests/**"],
-    "ignore": ["**/index.html"]
+    "includes": [
+      "packages/**/*.ts",
+      "packages/**/*.tsx",
+      "apps/**/src/**",
+      "apps/**/pages/**",
+      "apps/**/tests/**",
+      "!!**/dist",
+      "!!**/index.html"
+    ]
   }
 }

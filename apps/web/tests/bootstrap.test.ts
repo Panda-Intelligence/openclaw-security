@@ -62,9 +62,16 @@ describe('ensureAppSchema', () => {
     expect(db.executed.some((sql) => sql.includes('INSERT INTO app_meta'))).toBe(true);
   });
 
-  test('rejects mismatched schema version', async () => {
+  test('auto-migrates mismatched schema version in local bootstrap mode', async () => {
     const db = makeDb({ hasUsersTable: true, schemaVersion: '2025.01.01.1' });
-    await expect(ensureAppSchema(db as unknown as D1Database, { allowBootstrap: true })).rejects.toBeInstanceOf(
+    await ensureAppSchema(db as unknown as D1Database, { allowBootstrap: true });
+    expect(db.executed.some((sql) => sql.includes('CREATE TABLE IF NOT EXISTS users'))).toBe(true);
+    expect(db.executed.some((sql) => sql.includes('INSERT INTO app_meta'))).toBe(true);
+  });
+
+  test('rejects mismatched schema version in production mode', async () => {
+    const db = makeDb({ hasUsersTable: true, schemaVersion: '2025.01.01.1' });
+    await expect(ensureAppSchema(db as unknown as D1Database)).rejects.toBeInstanceOf(
       SchemaMigrationRequiredError,
     );
   });

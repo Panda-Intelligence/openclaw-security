@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { createProject, deleteProject, getMe, getProjects, getScans, logout } from '../lib/api';
-import type { ProjectRecord, ScanRecord } from '../lib/api';
+import { createProject, deleteProject, getMe, getPairings, getProjects, getScans, logout } from '../lib/api';
+import type { PairingRecord, ProjectRecord, ScanRecord } from '../lib/api';
 
 export default function DashboardPage() {
   const [user, setUser] = useState<{ email: string; name: string } | null>(null);
@@ -10,6 +10,7 @@ export default function DashboardPage() {
   const [newName, setNewName] = useState('');
   const [newUrl, setNewUrl] = useState('');
   const [error, setError] = useState('');
+  const [pairingMap, setPairingMap] = useState<Record<string, PairingRecord | null>>({});
 
   useEffect(() => {
     getMe().then((r) => {
@@ -17,6 +18,14 @@ export default function DashboardPage() {
       setPlan(r.data.subscription?.plan ?? 'free');
     });
     getProjects().then((r) => setProjects(r.data));
+    getPairings().then((r) => {
+      const nextPairingMap = r.data.reduce<Record<string, PairingRecord | null>>((map, pair) => {
+        if (pair.status === 'revoked' || map[pair.project_id]) return map;
+        map[pair.project_id] = pair;
+        return map;
+      }, {});
+      setPairingMap(nextPairingMap);
+    });
     getScans().then((r) => setRecentScans(r.data.slice(0, 10)));
   }, []);
 
@@ -116,13 +125,23 @@ export default function DashboardPage() {
               projects.map((p) => (
                 <div key={p.id} className="dashboard-item">
                   <div className="dashboard-item-meta">
-                    <strong>{p.name}</strong>
+                    <strong style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      {pairingMap[p.id]?.status === 'active' && <span className="pair-status-dot pair-status-active" title="Paired" />}
+                      {pairingMap[p.id]?.status === 'expired' && <span className="pair-status-dot pair-status-expired" title="Pairing expired" />}
+                      {pairingMap[p.id]?.status === 'error' && <span className="pair-status-dot pair-status-error" title="Pairing error" />}
+                      {p.name}
+                    </strong>
                     <span>{p.target_url}</span>
                   </div>
                   <div className="dashboard-item-actions">
                     <a href={`/?projectId=${p.id}&url=${encodeURIComponent(p.target_url)}`} className="button-ghost">
                       Scan
                     </a>
+                    {!pairingMap[p.id] && (
+                      <a href={`/?projectId=${p.id}&url=${encodeURIComponent(p.target_url)}&pair=1`} className="button-ghost">
+                        Pair
+                      </a>
+                    )}
                     <button type="button" onClick={() => handleDelete(p.id)} className="button-ghost" style={{ color: 'var(--critical)' }}>
                       Delete
                     </button>

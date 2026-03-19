@@ -209,3 +209,35 @@ export const getIntelligenceOverview = () =>
 
 export const getCommunityReports = (limit = 6) =>
   apiFetch<CommunityReportRecord[]>(`/community?limit=${limit}`);
+
+// ── Pairings ──
+
+export interface PairingRecord {
+  id: string;
+  project_id: string;
+  label: string;
+  status: 'active' | 'expired' | 'revoked' | 'error';
+  target_email: string | null;
+  target_tenant_id: string | null;
+  verified_at: string | null;
+  last_used_at: string | null;
+  expires_at: string | null;
+  error_message: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export const getPairings = (projectId?: string) =>
+  apiFetch<PairingRecord[]>(projectId ? `/pairings?projectId=${projectId}` : '/pairings');
+
+export const createPairing = (projectId: string, token: string) =>
+  apiFetch<PairingRecord>('/pairings', { method: 'POST', body: JSON.stringify({ projectId, token }) });
+
+export const verifyPairing = (id: string) =>
+  apiFetch<{ id: string; status: string; verifiedAt: string | null; expiresAt: string | null }>(`/pairings/${id}/verify`, { method: 'POST' });
+
+export const refreshPairing = (id: string, token: string) =>
+  apiFetch<PairingRecord>(`/pairings/${id}/refresh`, { method: 'POST', body: JSON.stringify({ token }) });
+
+export const revokePairing = (id: string) =>
+  apiFetch<void>(`/pairings/${id}`, { method: 'DELETE' });

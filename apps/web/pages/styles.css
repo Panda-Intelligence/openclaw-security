@@ -567,10 +567,6 @@ button {
   font-size: 0.88rem;
 }
 
-.pair-list li + li {
-  margin-top: 6px;
-}
-
 .pair-close {
   padding: 0.35rem 0.55rem;
   border: none;
@@ -581,6 +577,50 @@ button {
 
 .pair-close:hover {
   background: rgba(0, 0, 0, 0.04);
+}
+
+.pair-status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.pair-status-active {
+  background: var(--success);
+}
+
+.pair-status-expired {
+  background: var(--medium);
+}
+
+.pair-status-error {
+  background: var(--critical);
+}
+
+.pair-info-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pair-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+}
+
+.pair-info-label {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.pair-info-value {
+  color: var(--text);
+  text-align: right;
 }
 
 .steps-grid,
@@ -1034,6 +1074,10 @@ button {
 .pricing-list li {
   color: var(--text-muted);
   font-size: 0.92rem;
+}
+
+.pair-list li + li {
+  margin-top: 6px;
 }
 
 .community-stats-grid {

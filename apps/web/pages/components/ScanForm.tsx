@@ -1,9 +1,10 @@
 import type React from 'react';
 import { useEffect, useMemo, useState } from 'react';
-import { createScan, getCommunityReports, getIntelligenceOverview, getProjects, isLoggedIn } from '../lib/api';
-import type { CommunityReportRecord, IntelligenceOverview } from '../lib/api';
+import { createScan, getCommunityReports, getIntelligenceOverview, getPairings, getProjects, isLoggedIn } from '../lib/api';
+import type { CommunityReportRecord, IntelligenceOverview, PairingRecord } from '../lib/api';
 import type { ProjectRecord } from '../lib/api';
 import { PairFlow } from './PairFlow';
+import { PairSetup } from './PairSetup';
 
 interface Props {
   onStart: (scanId: string) => void;
@@ -88,6 +89,7 @@ export function ScanForm({ onStart }: Props) {
   const [copied, setCopied] = useState(false);
   const [overview, setOverview] = useState<IntelligenceOverview | null>(null);
   const [reports, setReports] = useState<CommunityReportRecord[]>([]);
+  const [pairing, setPairing] = useState<PairingRecord | null>(null);
   const loggedIn = isLoggedIn();
 
   useEffect(() => {
@@ -106,6 +108,20 @@ export function ScanForm({ onStart }: Props) {
       .catch(() => {});
   }, [loggedIn]);
 
+  // Fetch pairing status when project changes
+  useEffect(() => {
+    if (!selectedProjectId || !loggedIn) {
+      setPairing(null);
+      return;
+    }
+    getPairings(selectedProjectId)
+      .then((res) => {
+        const active = res.data.find((p) => p.status === 'active' || p.status === 'expired' || p.status === 'error');
+        setPairing(active ?? null);
+      })
+      .catch(() => setPairing(null));
+  }, [selectedProjectId, loggedIn]);
+
   const commandPreview = useMemo(() => {
     const target = url.trim() || 'https://your-deployment.example.com';
     return `bun run scan ${target}${deepScan ? ' --deep --token <jwt>' : ''}`;
@@ -120,7 +136,10 @@ export function ScanForm({ onStart }: Props) {
 
     try {
       const mode = deepScan ? 'active' : 'passive';
-      const result = await createScan(url.trim(), mode, deepScan ? jwt : undefined, selectedProjectId || undefined);
+      // If paired, don't send JWT — the server resolves it from the stored pairing
+      const hasPairing = pairing?.status === 'active';
+      const jwtToSend = deepScan && !hasPairing ? jwt : undefined;
+      const result = await createScan(url.trim(), mode, jwtToSend, selectedProjectId || undefined);
       onStart(result.data.id);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to start scan');
@@ -302,16 +321,35 @@ export function ScanForm({ onStart }: Props) {
                 checked={deepScan}
                 onChange={(e) => {
                   setDeepScan(e.target.checked);
-                  if (e.target.checked) setShowPair(true);
+                  if (e.target.checked && !pairing) setShowPair(true);
                 }}
               />
               <span>
-                <strong style={{ display: 'block', marginBottom: 2 }}>Enable deep scan</strong>
-                <span className="field-hint">Requires a JWT and unlocks authenticated read-only checks.</span>
+                <strong style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: 2 }}>
+                  Enable deep scan
+                  {pairing?.status === 'active' && (
+                    <span style={{ fontSize: '0.75rem', color: 'var(--success)', fontWeight: 400 }}>(paired)</span>
+                  )}
+                </strong>
+                <span className="field-hint">
+                  {pairing?.status === 'active'
+                    ? 'Uses stored pairing credential. No manual JWT needed.'
+                    : 'Requires a JWT and unlocks authenticated read-only checks.'}
+                </span>
               </span>
             </label>
 
-            {deepScan && showPair && <PairFlow jwt={jwt} onJwtChange={setJwt} onClose={() => setShowPair(false)} />}
+            {deepScan && selectedProjectId && (
+              <PairSetup
+                projectId={selectedProjectId}
+                pairing={pairing}
+                onUpdate={(updated) => setPairing(updated)}
+              />
+            )}
+
+            {deepScan && !selectedProjectId && showPair && (
+              <PairFlow jwt={jwt} onJwtChange={setJwt} onClose={() => setShowPair(false)} />
+            )}
 
             {error && <p className="error-text">{error}</p>}
 

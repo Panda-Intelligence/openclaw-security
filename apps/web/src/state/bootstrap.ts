@@ -180,9 +180,14 @@ export async function ensureAppSchema(
       if (!storedVersion) {
         await setStoredSchemaVersion(db, APP_SCHEMA_VERSION);
       } else if (storedVersion !== APP_SCHEMA_VERSION) {
-        throw new SchemaMigrationRequiredError(
-          `Database schema version ${storedVersion} does not match application schema version ${APP_SCHEMA_VERSION}. Run the D1 migrations.`,
-        );
+        if (allowBootstrap) {
+          await applySchema(db);
+          await setStoredSchemaVersion(db, APP_SCHEMA_VERSION);
+        } else {
+          throw new SchemaMigrationRequiredError(
+            `Database schema version ${storedVersion} does not match application schema version ${APP_SCHEMA_VERSION}. Run the D1 migrations.`,
+          );
+        }
       }
 
       schemaReady = true;

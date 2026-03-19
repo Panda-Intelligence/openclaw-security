@@ -27,7 +27,7 @@ function fromBase64(b64: string): Uint8Array {
 
 async function importKey(keyHex: string): Promise<CryptoKey> {
   const raw = hexToBytes(keyHex);
-  return crypto.subtle.importKey('raw', raw, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
+  return crypto.subtle.importKey('raw', raw.buffer as unknown as ArrayBuffer, { name: 'AES-GCM' }, false, ['encrypt', 'decrypt']);
 }
 
 export async function encrypt(
@@ -37,19 +37,20 @@ export async function encrypt(
   const key = await importKey(keyHex);
   const iv = crypto.getRandomValues(new Uint8Array(12));
   const encoded = new TextEncoder().encode(plaintext);
-  const encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, encoded);
+  const encrypted = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv.buffer as unknown as ArrayBuffer }, key, encoded);
   return {
     ciphertext: toBase64(encrypted),
-    iv: toBase64(iv.buffer),
+    iv: toBase64(iv.buffer as unknown as ArrayBuffer),
   };
 }
 
 export async function decrypt(ciphertext: string, iv: string, keyHex: string): Promise<string> {
   const key = await importKey(keyHex);
+  const ivBytes = fromBase64(iv);
   const decrypted = await crypto.subtle.decrypt(
-    { name: 'AES-GCM', iv: fromBase64(iv) },
+    { name: 'AES-GCM', iv: ivBytes.buffer as unknown as ArrayBuffer },
     key,
-    fromBase64(ciphertext),
+    fromBase64(ciphertext).buffer as unknown as ArrayBuffer,
   );
   return new TextDecoder().decode(decrypted);
 }

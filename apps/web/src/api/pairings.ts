@@ -69,7 +69,7 @@ pairingRoutes.post('/', validateBody(createPairingSchema), async (c) => {
 
   // Extract expiry from JWT payload
   const payload = decodeJwtPayload(body.token);
-  const exp = payload?.exp as number | undefined;
+  const exp = payload?.['exp'] as number | undefined;
   const expiresAt = exp ? new Date(exp * 1000).toISOString() : null;
 
   // Encrypt and store
@@ -84,17 +84,23 @@ pairingRoutes.post('/', validateBody(createPairingSchema), async (c) => {
     .bind(id, body.projectId, userId, ciphertext, iv, targetEmail, targetTenantId, expiresAt)
     .run();
 
+  const now = new Date().toISOString();
+
   return c.json({
     success: true,
     data: {
       id,
-      projectId: body.projectId,
+      project_id: body.projectId,
+      label: '',
       status: 'active',
-      targetEmail,
-      targetTenantId,
-      verifiedAt: new Date().toISOString(),
-      expiresAt,
-      createdAt: new Date().toISOString(),
+      target_email: targetEmail,
+      target_tenant_id: targetTenantId,
+      verified_at: now,
+      last_used_at: null,
+      expires_at: expiresAt,
+      error_message: null,
+      created_at: now,
+      updated_at: now,
     },
   }, 201);
 });
@@ -104,24 +110,30 @@ pairingRoutes.get('/', async (c) => {
   const userId = c.get('userId');
   const projectId = c.req.query('projectId');
 
-  if (!projectId) {
-    return c.json({ success: false, error: 'projectId query parameter is required' }, 400);
+  if (projectId) {
+    const project = await c.env.DB.prepare(`SELECT id FROM projects WHERE id = ? AND user_id = ?`)
+      .bind(projectId, userId)
+      .first();
+    if (!project) return c.json({ success: false, error: 'Project not found' }, 404);
   }
 
-  // Verify project ownership
-  const project = await c.env.DB.prepare(`SELECT id FROM projects WHERE id = ? AND user_id = ?`)
-    .bind(projectId, userId)
-    .first();
-  if (!project) return c.json({ success: false, error: 'Project not found' }, 404);
-
-  const result = await c.env.DB.prepare(
-    `SELECT id, project_id, label, status, target_email, target_tenant_id,
-            verified_at, last_used_at, expires_at, error_message, created_at, updated_at
-     FROM pairings WHERE project_id = ? AND user_id = ?
-     ORDER BY created_at DESC`,
-  )
-    .bind(projectId, userId)
-    .all();
+  const result = projectId
+    ? await c.env.DB.prepare(
+        `SELECT id, project_id, label, status, target_email, target_tenant_id,
+                verified_at, last_used_at, expires_at, error_message, created_at, updated_at
+         FROM pairings WHERE project_id = ? AND user_id = ?
+         ORDER BY created_at DESC`,
+      )
+        .bind(projectId, userId)
+        .all()
+    : await c.env.DB.prepare(
+        `SELECT id, project_id, label, status, target_email, target_tenant_id,
+                verified_at, last_used_at, expires_at, error_message, created_at, updated_at
+         FROM pairings WHERE user_id = ?
+         ORDER BY created_at DESC`,
+      )
+        .bind(userId)
+        .all();
 
   return c.json({ success: true, data: result.results });
 });
@@ -186,7 +198,7 @@ pairingRoutes.post('/:id/verify', async (c) => {
     if (resp.status === 200) {
       const data = (await resp.json()) as { data?: { tenantId?: string; email?: string } };
       const payload = decodeJwtPayload(token);
-      const exp = payload?.exp as number | undefined;
+      const exp = payload?.['exp'] as number | undefined;
       const expiresAt = exp ? new Date(exp * 1000).toISOString() : null;
 
       await c.env.DB.prepare(
@@ -221,7 +233,7 @@ pairingRoutes.post('/:id/refresh', validateBody(refreshPairingSchema), async (c)
   const body = c.get('validatedBody') as { token: string };
 
   const pairing = await c.env.DB.prepare(
-    `SELECT id, project_id FROM pairings WHERE id = ? AND user_id = ?`,
+    `SELECT id, project_id, label, created_at, last_used_at FROM pairings WHERE id = ? AND user_id = ?`,
   )
     .bind(id, userId)
     .first();
@@ -256,7 +268,7 @@ pairingRoutes.post('/:id/refresh', validateBody(refreshPairingSchema), async (c)
 
   // Extract expiry
   const payload = decodeJwtPayload(body.token);
-  const exp = payload?.exp as number | undefined;
+  const exp = payload?.['exp'] as number | undefined;
   const expiresAt = exp ? new Date(exp * 1000).toISOString() : null;
 
   // Encrypt and update
@@ -272,15 +284,23 @@ pairingRoutes.post('/:id/refresh', validateBody(refreshPairingSchema), async (c)
     .bind(ciphertext, iv, targetEmail, targetTenantId, expiresAt, id)
     .run();
 
+  const now = new Date().toISOString();
+
   return c.json({
     success: true,
     data: {
       id,
+      project_id: pairing['project_id'] as string,
+      label: (pairing['label'] as string | null) ?? '',
       status: 'active',
-      targetEmail,
-      targetTenantId,
-      verifiedAt: new Date().toISOString(),
-      expiresAt,
+      target_email: targetEmail,
+      target_tenant_id: targetTenantId,
+      verified_at: now,
+      last_used_at: (pairing['last_used_at'] as string | null) ?? null,
+      expires_at: expiresAt,
+      error_message: null,
+      created_at: (pairing['created_at'] as string | null) ?? now,
+      updated_at: now,
     },
   });
 });

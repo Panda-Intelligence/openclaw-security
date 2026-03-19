@@ -3,9 +3,9 @@
 ## Current State (v0.2.0 — 2026-03-17)
 
 **Core platform**: Scanner (20 checks), CLI, Web dashboard, Browser extension, Intelligence board.
-**SaaS layer**: Auth (Google/GitHub OAuth), Stripe billing (free/starter), projects, quotas.
+**SaaS layer**: Auth (Google/GitHub OAuth), Stripe billing (free/starter), projects, reusable deep-scan pairings, quotas.
 **Infrastructure**: Cloudflare Workers + D1 + Queues, multi-env deploy (staging/production).
-**Quality**: 198 tests, TypeScript strict, Biome lint, Zod validation, rate limiting.
+**Quality**: 219 tests, TypeScript strict, Biome lint, Zod validation, rate limiting.
 
 ---
 

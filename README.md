@@ -11,6 +11,7 @@ Paste a URL, get a structured security report — no auth required for passive s
 ## Features
 
 - **20 security checks** — 14 passive (headers, CORS, TLS, endpoints, error disclosure) + 6 active (JWT, agent config, memory injection, skills, schedules, channels)
+- **Persistent deep-scan pairing** — Store a verified project JWT once in the dashboard and reuse it for later authenticated scans
 - **Penalty-based scoring** — 0-100 score with per-category caps
 - **Multiple interfaces** — Web dashboard, CLI tool, browser extension
 - **Community reports** — Anonymous aggregated security data
@@ -66,6 +67,8 @@ Probes public-facing endpoints and HTTP headers:
 ### Active (JWT required)
 
 Reads agent configuration via authenticated API calls (GET only, read-only):
+
+In the web dashboard, a project can be paired with a verified JWT so later deep scans can reuse the stored credential without re-pasting the token every time.
 
 | Check | What it tests |
 |-------|--------------|
@@ -141,7 +144,7 @@ Open http://localhost:5173
 bun run dev              # Web UI dev server (port 5173)
 bun run dev:worker       # API + D1 (port 8787, wrangler)
 bun run scan <url>       # CLI scan shortcut
-bun test                 # Run all 198 tests
+bun test                 # Run all 219 tests
 bun run typecheck        # Type check all packages
 bun run lint             # Biome lint
 bun run ci               # Full CI pipeline
