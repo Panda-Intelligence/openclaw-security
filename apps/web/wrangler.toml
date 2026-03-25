@@ -6,6 +6,9 @@ compatibility_date = "2025-03-10"
 directory = "dist"
 binding = "ASSETS"
 
+[triggers]
+crons = ["17 */6 * * *"]
+
 # D1 database — local dev uses wrangler's built-in SQLite.
 # For production: run `bun run db:create` then replace database_id.
 [[d1_databases]]
@@ -38,6 +41,9 @@ STRIPE_PRICE_STARTER = ""
 [env.production]
 name = "openclaw-security-web"
 
+[env.production.triggers]
+crons = ["17 */6 * * *"]
+
 [env.production.vars]
 GOOGLE_CLIENT_ID = "892178929987-n3m0nlgl5aki03tl4tjt5gbpi5rvkr93.apps.googleusercontent.com"
 GOOGLE_REDIRECT_URI = "https://openclawsecurity.io/api/auth/google/callback"
@@ -62,6 +68,9 @@ max_retries = 2
 # ── Staging environment ──
 [env.staging]
 name = "openclaw-security-web-staging"
+
+[env.staging.triggers]
+crons = ["17 */6 * * *"]
 
 [env.staging.vars]
 GOOGLE_CLIENT_ID = "892178929987-n3m0nlgl5aki03tl4tjt5gbpi5rvkr93.apps.googleusercontent.com"

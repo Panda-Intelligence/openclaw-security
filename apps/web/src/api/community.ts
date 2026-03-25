@@ -1,5 +1,5 @@
 import { Hono } from 'hono';
-import { getIntelligenceOverview } from '../intelligence';
+import { getStoredIntelligenceOverview } from '../intelligence-store';
 import type { Env } from '../worker';
 import { validateBody, communityReportSchema } from '../middleware/validate';
 
@@ -126,26 +126,30 @@ communityRoutes.get('/leaderboard', async (c) => {
 });
 
 // GET /api/community/intelligence — public OpenClaw security intelligence board
-communityRoutes.get('/intelligence', (c) => {
-  return c.json({ success: true, data: getIntelligenceOverview() });
+communityRoutes.get('/intelligence', async (c) => {
+  return c.json({ success: true, data: await getStoredIntelligenceOverview(c.env.DB) });
 });
 
-communityRoutes.get('/intelligence/releases', (c) => {
-  return c.json({ success: true, data: getIntelligenceOverview().releases });
+communityRoutes.get('/intelligence/releases', async (c) => {
+  return c.json({ success: true, data: (await getStoredIntelligenceOverview(c.env.DB)).releases });
 });
 
-communityRoutes.get('/intelligence/skills', (c) => {
-  return c.json({ success: true, data: getIntelligenceOverview().marketplaceSkills });
+communityRoutes.get('/intelligence/advisories', async (c) => {
+  return c.json({ success: true, data: (await getStoredIntelligenceOverview(c.env.DB)).versionAdvisories });
 });
 
-communityRoutes.get('/intelligence/install', (c) => {
-  return c.json({ success: true, data: getIntelligenceOverview().installHardening });
+communityRoutes.get('/intelligence/skills', async (c) => {
+  return c.json({ success: true, data: (await getStoredIntelligenceOverview(c.env.DB)).marketplaceSkills });
 });
 
-communityRoutes.get('/intelligence/llm', (c) => {
-  return c.json({ success: true, data: getIntelligenceOverview().llmSecurity });
+communityRoutes.get('/intelligence/install', async (c) => {
+  return c.json({ success: true, data: (await getStoredIntelligenceOverview(c.env.DB)).installHardening });
 });
 
-communityRoutes.get('/intelligence/gateway', (c) => {
-  return c.json({ success: true, data: getIntelligenceOverview().gatewayHardening });
+communityRoutes.get('/intelligence/llm', async (c) => {
+  return c.json({ success: true, data: (await getStoredIntelligenceOverview(c.env.DB)).llmSecurity });
+});
+
+communityRoutes.get('/intelligence/gateway', async (c) => {
+  return c.json({ success: true, data: (await getStoredIntelligenceOverview(c.env.DB)).gatewayHardening });
 });

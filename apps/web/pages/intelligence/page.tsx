@@ -5,11 +5,14 @@ import type { IntelligenceBoardItem, IntelligenceOverview } from '../lib/api';
 const sectionAnchors = [
   { id: 'skills-watch', label: 'Skills' },
   { id: 'release-watch', label: 'Releases' },
+  { id: 'version-advisories', label: 'Advisories' },
   { id: 'install-hardening', label: 'Install' },
   { id: 'llm-security', label: 'LLM' },
   { id: 'gateway-hardening', label: 'Gateway' },
   { id: 'official-sources', label: 'Sources' },
 ] as const;
+
+const INTELLIGENCE_BOARD_COUNT = 6;
 
 const researchPillars = [
   {
@@ -100,10 +103,11 @@ export default function IntelligencePage() {
     });
 
   const skillsItems = applyFilters(overview.marketplaceSkills);
+  const advisoryItems = applyFilters(overview.versionAdvisories);
   const installItems = applyFilters(overview.installHardening);
   const llmItems = applyFilters(overview.llmSecurity);
   const gatewayItems = applyFilters(overview.gatewayHardening);
-  const allRiskItems = [...skillsItems, ...installItems, ...llmItems, ...gatewayItems];
+  const allRiskItems = [...skillsItems, ...advisoryItems, ...installItems, ...llmItems, ...gatewayItems];
   const severitySummary = allRiskItems.reduce(
     (acc, item) => {
       acc[item.risk] += 1;
@@ -111,7 +115,13 @@ export default function IntelligencePage() {
     },
     { critical: 0, high: 0, medium: 0, low: 0 } as Record<'critical' | 'high' | 'medium' | 'low', number>,
   );
-  const totalVisibleSignals = skillsItems.length + installItems.length + llmItems.length + gatewayItems.length + overview.releases.length;
+  const totalVisibleSignals =
+    skillsItems.length +
+    advisoryItems.length +
+    installItems.length +
+    llmItems.length +
+    gatewayItems.length +
+    overview.releases.length;
 
   return (
     <div className="page-medium">
@@ -125,7 +135,7 @@ export default function IntelligencePage() {
 
       <section className="dashboard-summary fade-up">
         <div className="dashboard-summary-card">
-          <strong>5</strong>
+          <strong>{INTELLIGENCE_BOARD_COUNT}</strong>
           <span>Intelligence boards</span>
         </div>
         <div className="dashboard-summary-card">
@@ -199,7 +209,7 @@ export default function IntelligencePage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="field-input"
-                placeholder="Search skills, releases, LLM risks, gateway exposure..."
+                placeholder="Search skills, advisories, releases, LLM risks, gateway exposure..."
               />
               <div className="filter-chip-row">
                 {(['all', 'critical', 'high', 'medium', 'low'] as const).map((risk) => (
@@ -280,6 +290,13 @@ export default function IntelligencePage() {
                 ))}
               </div>
             </section>
+
+            <BoardSection
+              id="version-advisories"
+              title="Version advisory & CVE watch"
+              copy="Surface which release lines still carry tracked advisories or end-of-life status in the shared scanner-core version database."
+              items={advisoryItems}
+            />
           </div>
 
           <div className="community-column">

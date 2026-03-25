@@ -1,22 +1,41 @@
 # 验证总结
 
-日期：2026-03-19  
+日期：2026-03-25  
 执行者：Codex
 
 ## 已验证项
 
-- `bun run lint`：通过（无 warning/info）
+- `bun run lint`：通过（`Checked 114 files in 51ms`）
 - `bun run typecheck`：通过
-- `bun test`：通过（219 个测试）
+- `bun test`：通过（241 个测试）
 - `bun run build`：通过
 
-## 处理结果
+## 本轮完成项
 
-- 已修复 `biome.json` 与当前 `Biome 2.4.7` 的兼容性问题，恢复 lint 门禁
-- 已新增 `apps/web/tests/pairings.test.ts`，覆盖 pairing API 与 scan 自动取 pairing token 分支
-- 已统一 create/refresh pairing 接口返回字段，消除前后端字段不一致问题
-- 已将 dashboard 的 pairing 状态加载改为单次请求，去除逐项目 N+1 调用
+- 已为 `packages/scanner-core` 新增 `openclaw-feed.ts`，提供：
+  - GitHub releases / commits 上游快照抓取
+  - OSV advisory feed 查询
+  - advisory 与版本数据库合并
+- 已为 `packages/scanner-core/src/version-db.ts` 增加 `buildVersionDatabaseFromSnapshot()`，支持基于实时 snapshot 派生版本基线。
+- 已在 `packages/scanner-core/src/index.ts` 导出 feed 能力与相关类型，便于 web/extension 共享复用。
+- 已新增 `apps/web/src/intelligence-store.ts`，使用既有 `app_meta` 缓存：
+  - `intelligence_upstream_snapshot`
+  - `intelligence_advisory_feed`
+  - `intelligence_refreshed_at`
+  - `intelligence_refresh_error`
+- 已将 `apps/web/src/intelligence.ts` 重构为 `buildIntelligenceOverview()` + `getIntelligenceOverview()`，支持注入动态 snapshot、版本库与社区部署影响数。
+- 已让 `/api/community/intelligence*` 路由改为优先读取数据库缓存，在无缓存或缓存损坏时自动回退静态 overview。
+- 已让 worker 增加 `scheduled` intelligence refresh 入口，并在 `apps/web/wrangler.toml` 配置 cron triggers。
+- 已让 intelligence advisory 结合 `community_reports.platform_version` 聚合结果，在信号中显示社区已观测部署数量。
+
+## 新增验证覆盖
+
+- `packages/scanner-core/tests/openclaw-feed.test.ts`
+- `apps/web/tests/intelligence-store.test.ts`
+- `apps/web/tests/intelligence.test.ts`
+- `apps/web/tests/routes.test.ts`
+- `apps/web/tests/worker.test.ts`
 
 ## 当前结论
 
-项目主体可 lint、可编译、可构建、可测试；当前主线改动已具备较完整的本地验证证据。
+项目当前主线可 lint、可编译、可构建、可测试；intelligence 自动刷新与真实 advisory feed 接入已在本地完成闭环，并与既有 extension 复用 scanner-core、queue 测试稳定化、web intelligence 展示链路兼容共存。

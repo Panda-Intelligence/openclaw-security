@@ -7,6 +7,7 @@ import { pairingRoutes } from './api/pairings';
 import { projectRoutes } from './api/projects';
 import { reportRoutes } from './api/reports';
 import { scanRoutes } from './api/scans';
+import { refreshIntelligenceCache } from './intelligence-store';
 import { rateLimit } from './middleware/rate-limit';
 import { handleScanQueue } from './queue/scan-consumer';
 import { ensureAppSchema, SchemaMigrationRequiredError } from './state/bootstrap';
@@ -179,5 +180,10 @@ export default {
         msg.retry();
       }
     }
+  },
+
+  async scheduled(_event: ScheduledEvent, env: Env): Promise<void> {
+    await ensureAppSchema(env.DB);
+    await refreshIntelligenceCache(env.DB);
   },
 };

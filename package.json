@@ -37,6 +37,7 @@
     "format:check": "bunx biome format .",
     "typecheck": "bunx tsc --noEmit -p packages/scanner-core/tsconfig.json && bunx tsc --noEmit -p packages/cli/tsconfig.json && bunx tsc --noEmit -p apps/web/tsconfig.json && bunx tsc --noEmit -p apps/extension/tsconfig.json",
     "ci": "bun run typecheck && bun run lint && bun test",
+    "update:openclaw-data": "bun run packages/scanner-core/src/update-openclaw-upstream.ts",
     "db:create": "cd apps/web && bunx wrangler d1 create openclaw-security-db",
     "db:migrate:local": "cd apps/web && bunx wrangler d1 migrations apply openclaw-security-db --local",
     "db:migrate:remote": "cd apps/web && bunx wrangler d1 migrations apply openclaw-security-db --remote"

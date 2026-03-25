@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, test } from 'bun:test';
-import { resetSchemaBootstrapForTests } from '../src/state/bootstrap';
+import { INTELLIGENCE_META_KEYS } from '../src/intelligence-store';
+import { APP_SCHEMA_VERSION, resetSchemaBootstrapForTests } from '../src/state/bootstrap';
 import worker, { type Env } from '../src/worker';
 
 function makeEnv(overrides: Partial<Env> = {}): Env {
@@ -146,5 +147,100 @@ describe('worker asset fallback', () => {
 
     expect(res.status).toBe(200);
     expect(await res.text()).toBe('asset-body');
+  });
+
+  test('scheduled refresh populates cached intelligence metadata', async () => {
+    const meta = new Map<string, string>([['schema_version', APP_SCHEMA_VERSION]]);
+    const db = {
+      prepare(sql: string) {
+        let binds: unknown[] = [];
+        const statement = {
+          bind: (...args: unknown[]) => {
+            binds = args;
+            return statement;
+          },
+          first: async () => {
+            if (sql.includes(`sqlite_master`)) {
+              return { name: 'users' };
+            }
+            if (sql.includes(`FROM app_meta WHERE key = 'schema_version'`)) {
+              return { value: APP_SCHEMA_VERSION };
+            }
+            if (sql.includes('FROM app_meta WHERE key = ?')) {
+              const key = String(binds[0] ?? '');
+              return meta.has(key) ? { value: meta.get(key) } : null;
+            }
+            return null;
+          },
+          all: async () => ({ results: [] }),
+          run: async () => {
+            if (sql.includes('INSERT INTO app_meta')) {
+              meta.set(String(binds[0] ?? ''), String(binds[1] ?? ''));
+            }
+            return { success: true };
+          },
+        };
+        return statement;
+      },
+    } as unknown as D1Database;
+
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input);
+
+      if (url.includes('/releases')) {
+        return new Response(
+          JSON.stringify([
+            {
+              name: 'OpenClaw 2026.3.24',
+              tag_name: 'v2026.3.24',
+              prerelease: false,
+              published_at: '2026-03-24T10:00:00Z',
+              html_url: 'https://github.com/openclaw/openclaw/releases/tag/v2026.3.24',
+              body: 'Stable release',
+            },
+          ]),
+          { status: 200, headers: { 'Content-Type': 'application/json' } },
+        );
+      }
+
+      if (url.includes('/commits')) {
+        return new Response(
+          JSON.stringify([
+            {
+              sha: 'abcdef1234567890',
+              html_url: 'https://github.com/openclaw/openclaw/commit/abcdef1234567890',
+              commit: {
+                author: { date: '2026-03-24T10:30:00Z' },
+                message: 'fix: refresh intelligence cache',
+              },
+            },
+          ]),
+          { status: 200, headers: { 'Content-Type': 'application/json' } },
+        );
+      }
+
+      if (url.includes('api.osv.dev')) {
+        expect(JSON.parse(String(init?.body))).toMatchObject({ version: 'v2026.3.24' });
+        return new Response(JSON.stringify({ vulns: [] }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+
+      throw new Error(`Unexpected URL: ${url}`);
+    }) as typeof fetch;
+
+    try {
+      expect(worker.scheduled).toBeDefined();
+      await worker.scheduled?.({} as ScheduledEvent, makeEnv({ DB: db }), {} as ExecutionContext);
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+
+    expect(meta.get(INTELLIGENCE_META_KEYS.upstreamSnapshot)).toBeTruthy();
+    expect(meta.get(INTELLIGENCE_META_KEYS.advisoryFeed)).toBeTruthy();
+    expect(meta.get(INTELLIGENCE_META_KEYS.refreshedAt)).toBeTruthy();
+    expect(meta.get(INTELLIGENCE_META_KEYS.refreshError)).toBe('');
   });
 });

@@ -12,10 +12,38 @@ export {
   type JwtPayload,
 } from './jwt-analyzer';
 export { formatReport } from './report-formatter';
+export {
+  buildOpenClawUpstreamSnapshot,
+  fetchOpenClawAdvisoryFeed,
+  mergeVersionDatabaseWithAdvisories,
+  OPENCLAW_GIT_URL,
+  OPENCLAW_REPOSITORY,
+  type OpenClawAdvisoryRecord,
+  type OpenClawAdvisoryReference,
+  type OpenClawVersionAdvisoryRecord,
+} from './openclaw-feed';
+export {
+  getLatestPrerelease,
+  getLatestStableRelease,
+  getOpenClawUpstreamSnapshot,
+  type OpenClawCommitRecord,
+  type OpenClawReleaseRecord,
+  type OpenClawUpstreamSnapshot,
+} from './openclaw-upstream';
 export { scan } from './scanner';
 export { computeScore, countSeverities, setCheckCategory } from './scoring';
 export * from './types';
-export { getCvesForVersion, getLatestVersion, isEol, isOutdated, lookupVersion } from './version-db';
+export {
+  buildVersionDatabaseFromSnapshot,
+  getCvesForVersion,
+  getLatestVersion,
+  getVersionDatabase,
+  isEol,
+  isOutdated,
+  lookupVersion,
+  type CveEntry,
+  type VersionEntry,
+} from './version-db';
 
 // Side-effect: registers all checks
 import './checks/index';

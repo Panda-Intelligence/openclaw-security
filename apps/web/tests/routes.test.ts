@@ -1,6 +1,7 @@
 import { describe, test, expect } from 'bun:test';
 import { Hono } from 'hono';
 import type { Env } from '../src/worker';
+import { INTELLIGENCE_META_KEYS } from '../src/intelligence-store';
 
 // ── D1 mock ──
 
@@ -130,6 +131,51 @@ function communityApp(db: ReturnType<typeof mockDb>) {
   return { app, env: fakeEnv(db) };
 }
 
+function intelligenceCacheDb(options: {
+  snapshot: string;
+  advisoryFeed: string;
+  refreshedAt?: string;
+  versionImpactCounts?: Record<string, number>;
+}) {
+  const meta = new Map<string, string>([
+    [INTELLIGENCE_META_KEYS.upstreamSnapshot, options.snapshot],
+    [INTELLIGENCE_META_KEYS.advisoryFeed, options.advisoryFeed],
+    ...(options.refreshedAt ? [[INTELLIGENCE_META_KEYS.refreshedAt, options.refreshedAt]] : []),
+  ]);
+
+  return {
+    prepare(sql: string) {
+      let binds: unknown[] = [];
+      const statement = {
+        bind: (...args: unknown[]) => {
+          binds = args;
+          return statement;
+        },
+        first: async () => {
+          if (sql.includes('FROM app_meta WHERE key = ?')) {
+            const key = String(binds[0] ?? '');
+            return meta.has(key) ? { value: meta.get(key) } : null;
+          }
+          return null;
+        },
+        all: async () => {
+          if (sql.includes('GROUP BY platform_version')) {
+            return {
+              results: Object.entries(options.versionImpactCounts ?? {}).map(([version, count]) => ({
+                version,
+                count,
+              })),
+            };
+          }
+          return { results: [] };
+        },
+        run: async () => ({ success: true }),
+      };
+      return statement;
+    },
+  };
+}
+
 describe('communityRoutes', () => {
   test('POST / validates input', async () => {
     const db = mockDb();
@@ -193,7 +239,73 @@ describe('communityRoutes', () => {
     const data = await res.json();
     expect(data.success).toBe(true);
     expect(data.data.marketplaceSkills.length).toBeGreaterThan(0);
+    expect(data.data.versionAdvisories.length).toBeGreaterThan(0);
     expect(data.data.sources.length).toBeGreaterThan(0);
+  });
+
+  test('GET /intelligence/advisories returns version advisory items', async () => {
+    const db = mockDb();
+    const { app, env } = communityApp(db);
+    const res = await appRequest(app, env, '/intelligence/advisories');
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data.success).toBe(true);
+    expect(data.data.length).toBeGreaterThan(0);
+  });
+
+  test('GET /intelligence/advisories prefers cached intelligence data when available', async () => {
+    const db = intelligenceCacheDb({
+      snapshot: JSON.stringify({
+        capturedAt: '2026-03-25T10:00:00Z',
+        repository: 'openclaw/openclaw',
+        latestStableVersion: '2026.3.24',
+        latestStableTag: 'v2026.3.24',
+        releases: [
+          {
+            version: '2026.3.24',
+            tag: 'v2026.3.24',
+            publishedAt: '2026-03-24T10:00:00Z',
+            url: 'https://github.com/openclaw/openclaw/releases/tag/v2026.3.24',
+            prerelease: false,
+            summary: 'Stable release',
+          },
+        ],
+        recentCommits: [],
+      }),
+      advisoryFeed: JSON.stringify([
+        {
+          version: '2026.3.24',
+          tag: 'v2026.3.24',
+          prerelease: false,
+          advisories: [
+            {
+              id: 'OSV-2026-5000',
+              aliases: ['CVE-2026-5000'],
+              summary: 'Cache-backed advisory',
+              details: 'Cache-backed advisory',
+              severity: 'high',
+              fixedVersions: ['2026.3.25'],
+              references: [],
+              publishedAt: null,
+              modifiedAt: null,
+              source: 'https://osv.dev/vulnerability/OSV-2026-5000',
+            },
+          ],
+        },
+      ]),
+      refreshedAt: '2026-03-25T11:00:00Z',
+      versionImpactCounts: { '2026.3.24': 2 },
+    });
+    const { app, env } = communityApp(db as ReturnType<typeof mockDb>);
+    const res = await appRequest(app, env, '/intelligence/advisories');
+
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data.success).toBe(true);
+    expect(data.data.some((item: { name: string }) => item.name === 'Version 2026.3.24')).toBe(true);
+    expect(
+      data.data.find((item: { name: string; signal: string }) => item.name === 'Version 2026.3.24')?.signal,
+    ).toContain('CVE-2026-5000');
   });
 
   test('GET /intelligence/gateway returns gateway hardening items', async () => {
