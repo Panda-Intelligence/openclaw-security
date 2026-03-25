@@ -10,6 +10,9 @@ type Row = Record<string, unknown>;
 function createIntelligenceDb(options: {
   meta?: Record<string, string>;
   versionImpactCounts?: Record<string, number>;
+  communityReports?: Row[];
+  topIssue?: Row | null;
+  recentLowScoreCount?: number;
 } = {}) {
   const meta = new Map(Object.entries(options.meta ?? {}));
   const statements: Array<{ sql: string; binds: unknown[] }> = [];
@@ -30,6 +33,12 @@ function createIntelligenceDb(options: {
             const key = String(binds[0] ?? '');
             return meta.has(key) ? ({ value: meta.get(key) } satisfies Row) : null;
           }
+          if (sql.includes('FROM findings')) {
+            return options.topIssue ?? null;
+          }
+          if (sql.includes("WHERE uploaded_at >= date('now', '-30 days') AND score < 60")) {
+            return { count: options.recentLowScoreCount ?? 0 } satisfies Row;
+          }
           return null;
         },
         all: async () => {
@@ -39,6 +48,9 @@ function createIntelligenceDb(options: {
                 ([version, count]) => ({ version, count }) satisfies Row,
               ),
             };
+          }
+          if (sql.includes('SELECT score, severity_counts, finding_count FROM community_reports')) {
+            return { results: options.communityReports ?? [] };
           }
           return { results: [] as Row[] };
         },
@@ -73,6 +85,44 @@ describe('intelligence store', () => {
     expect(overview.versionAdvisories.find((item) => item.name === 'Version 0.1.0')?.signal).toContain(
       'Community reports: 2 deployments',
     );
+    expect(overview.communitySignals).toEqual([]);
+  });
+
+  test('aggregates anonymous community reports into threat signals', async () => {
+    const db = createIntelligenceDb({
+      communityReports: [
+        {
+          score: 42,
+          severity_counts: JSON.stringify({ critical: 1, high: 2, medium: 1 }),
+          finding_count: 4,
+        },
+        {
+          score: 81,
+          severity_counts: JSON.stringify({ high: 1, low: 3 }),
+          finding_count: 4,
+        },
+      ],
+      topIssue: {
+        check_id: 'cors-misconfig',
+        title: 'CORS allows wildcard origin with credentials',
+        severity: 'high',
+        count: 3,
+      },
+      recentLowScoreCount: 1,
+    });
+
+    const overview = await getStoredIntelligenceOverview(db as unknown as D1Database);
+
+    expect(overview.communitySignals).toHaveLength(3);
+    expect(overview.communitySignals[0]).toEqual({
+      name: 'Anonymous deployment severity concentration',
+      risk: 'critical',
+      summary:
+        'Anonymous community submissions currently include 1 critical and 3 high findings across 2 deployments.',
+      signal: 'Affected reports: 2/2 · Total findings logged: 8',
+    });
+    expect(overview.communitySignals[1]?.name).toContain('cors-misconfig');
+    expect(overview.communitySignals[2]?.signal).toContain('Last 30 days below 60: 1');
   });
 
   test('refreshIntelligenceCache stores snapshot/feed metadata and returns merged overview', async () => {

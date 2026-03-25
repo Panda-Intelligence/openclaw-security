@@ -241,6 +241,7 @@ describe('communityRoutes', () => {
     expect(data.data.marketplaceSkills.length).toBeGreaterThan(0);
     expect(data.data.versionAdvisories.length).toBeGreaterThan(0);
     expect(data.data.sources.length).toBeGreaterThan(0);
+    expect(Array.isArray(data.data.communitySignals)).toBe(true);
   });
 
   test('GET /intelligence/advisories returns version advisory items', async () => {
@@ -251,6 +252,17 @@ describe('communityRoutes', () => {
     const data = await res.json();
     expect(data.success).toBe(true);
     expect(data.data.length).toBeGreaterThan(0);
+  });
+
+  test('GET /intelligence/community returns community threat signal items', async () => {
+    const db = mockDb();
+    const { app, env } = communityApp(db);
+    const res = await appRequest(app, env, '/intelligence/community');
+
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data.success).toBe(true);
+    expect(Array.isArray(data.data)).toBe(true);
   });
 
   test('GET /intelligence/advisories prefers cached intelligence data when available', async () => {

@@ -34,6 +34,7 @@ export interface IntelligenceOverview {
   sources: IntelligenceSource[];
   marketplaceSkills: IntelligenceBoardItem[];
   releases: ReleaseWatchItem[];
+  communitySignals: IntelligenceBoardItem[];
   versionAdvisories: IntelligenceBoardItem[];
   installHardening: IntelligenceBoardItem[];
   llmSecurity: IntelligenceBoardItem[];
@@ -44,6 +45,7 @@ export interface BuildIntelligenceOverviewOptions {
   upstreamSnapshot?: OpenClawUpstreamSnapshot;
   versionDatabase?: VersionEntry[];
   versionImpactCounts?: Record<string, number>;
+  communitySignals?: IntelligenceBoardItem[];
   capturedAt?: string;
 }
 
@@ -366,6 +368,7 @@ export function buildIntelligenceOverview(
     sources: buildIntelligenceSources(upstreamSnapshot, capturedAt),
     marketplaceSkills: marketplaceSkillsBoard,
     releases: buildReleaseWatch(upstreamSnapshot, capturedAt),
+    communitySignals: options.communitySignals ?? [],
     versionAdvisories: buildVersionAdvisoriesBoard(
       upstreamSnapshot,
       versionDatabase,

@@ -5,9 +5,9 @@
 
 ## 已验证项
 
-- `bun run lint`：通过（`Checked 114 files in 51ms`）
+- `bun run lint`：通过（`Checked 114 files in 49ms`）
 - `bun run typecheck`：通过
-- `bun test`：通过（241 个测试）
+- `bun test`：通过（243 个测试）
 - `bun run build`：通过
 
 ## 本轮完成项
@@ -27,6 +27,8 @@
 - 已让 `/api/community/intelligence*` 路由改为优先读取数据库缓存，在无缓存或缓存损坏时自动回退静态 overview。
 - 已让 worker 增加 `scheduled` intelligence refresh 入口，并在 `apps/web/wrangler.toml` 配置 cron triggers。
 - 已让 intelligence advisory 结合 `community_reports.platform_version` 聚合结果，在信号中显示社区已观测部署数量。
+- 已新增 community threat signals 聚合：基于 `community_reports` 与 `findings` 生成匿名部署严重度集中度、最高频问题与近 30 天低分压力信号，并接入 intelligence overview / route / 页面展示。
+- 已新增 `/api/community/intelligence/community` 端点，用于返回 community threat signals。
 
 ## 新增验证覆盖
 

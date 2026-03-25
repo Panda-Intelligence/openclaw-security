@@ -28,9 +28,9 @@
 ## v0.4.0 — Intelligence Platform
 
 ### Live intelligence
-- [ ] Auto-update intelligence data from OpenClaw release feeds (RSS/API)
-- [ ] CVE feed integration — auto-correlate new CVEs with scanned deployment versions
-- [ ] Community threat signals — aggregate anonymous scan findings into threat intelligence
+- [x] Auto-update intelligence data from OpenClaw release feeds (RSS/API)
+- [x] CVE feed integration — auto-correlate new CVEs with scanned deployment versions
+- [x] Community threat signals — aggregate anonymous scan findings into threat intelligence
 
 ### Alerting
 - [ ] Email/webhook alerts when a monitored project's score drops below threshold

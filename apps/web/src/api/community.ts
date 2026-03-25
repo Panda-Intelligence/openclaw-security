@@ -138,6 +138,10 @@ communityRoutes.get('/intelligence/advisories', async (c) => {
   return c.json({ success: true, data: (await getStoredIntelligenceOverview(c.env.DB)).versionAdvisories });
 });
 
+communityRoutes.get('/intelligence/community', async (c) => {
+  return c.json({ success: true, data: (await getStoredIntelligenceOverview(c.env.DB)).communitySignals });
+});
+
 communityRoutes.get('/intelligence/skills', async (c) => {
   return c.json({ success: true, data: (await getStoredIntelligenceOverview(c.env.DB)).marketplaceSkills });
 });

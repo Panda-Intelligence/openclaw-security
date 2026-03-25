@@ -74,12 +74,21 @@ describe('intelligence overview', () => {
       upstreamSnapshot,
       versionDatabase,
       versionImpactCounts: { '2026.3.24': 3 },
+      communitySignals: [
+        {
+          name: 'Most repeated issue: cors-misconfig',
+          risk: 'high',
+          summary: 'Wildcard CORS remains the top repeated anonymous issue.',
+          signal: 'Seen 3 times · Severity high',
+        },
+      ],
       capturedAt: '2026-03-25T11:00:00Z',
     });
 
     expect(overview.capturedAt).toBe('2026-03-25');
     expect(overview.releases[0]?.version).toBe('2026.3.24');
     expect(overview.sources[0]?.note).toContain('2026.3.24');
+    expect(overview.communitySignals).toHaveLength(1);
     expect(overview.versionAdvisories.find((item) => item.name === 'Version 2026.3.24')?.signal).toContain(
       'Community reports: 3 deployments',
     );
