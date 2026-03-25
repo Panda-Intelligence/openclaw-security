@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'bun:test';
+import apiKeyExposure from '../src/checks/passive/api-key-exposure';
 import cookieAudit from '../src/checks/passive/cookie-audit';
 import cspDeepAudit from '../src/checks/passive/csp-deep-audit';
 import errorDisclosure from '../src/checks/passive/error-disclosure';
@@ -147,6 +148,61 @@ describe('cookie-audit check', () => {
     );
     const result = await cookieAudit.run(ctx);
     expect(result.status).toBe('pass');
+  });
+});
+
+describe('api-key-exposure check', () => {
+  test('detects high-signal API keys in public response bodies', async () => {
+    const fakeOpenAiKey = `sk-proj-${'1234567890abcdefghijklmnop'}`;
+    const fakeGitHubToken = ['ghp', '1234567890abcdefghijklmnopqrstuv'].join('_');
+    const ctx = makeCtx(
+      makeResponse({
+        body: JSON.stringify({
+          leaked: fakeOpenAiKey,
+          github: fakeGitHubToken,
+        }),
+      }),
+    );
+
+    const result = await apiKeyExposure.run(ctx);
+
+    expect(result.status).toBe('fail');
+    expect(result.findings.some((finding) => finding.title.includes('OpenAI API key'))).toBe(true);
+    expect(result.findings.some((finding) => finding.title.includes('GitHub token'))).toBe(true);
+    expect(result.findings.every((finding) => !finding.evidence.includes('1234567890abcdefghijklmnop'))).toBe(true);
+  });
+
+  test('detects secrets leaked in response headers', async () => {
+    const fakeStripeKey = ['sk', 'live', '1234567890abcdefghijklmnop'].join('_');
+    const ctx = makeCtx(
+      makeResponse({
+        headers: {
+          'x-stripe-debug': fakeStripeKey,
+        },
+      }),
+    );
+
+    const result = await apiKeyExposure.run(ctx);
+
+    expect(result.status).toBe('fail');
+    expect(result.findings.some((finding) => finding.title.includes('Stripe secret key'))).toBe(true);
+    expect(result.findings[0]?.severity).toBe('critical');
+  });
+
+  test('passes when public responses do not contain key-like secrets', async () => {
+    const ctx = makeCtx(
+      makeResponse({
+        headers: {
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({ success: true, message: 'clean response' }),
+      }),
+    );
+
+    const result = await apiKeyExposure.run(ctx);
+
+    expect(result.status).toBe('pass');
+    expect(result.findings).toHaveLength(0);
   });
 });
 

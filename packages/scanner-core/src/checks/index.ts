@@ -8,6 +8,7 @@ import memoryInjectionScan from './active/memory-injection-scan';
 import scheduleReview from './active/schedule-review';
 import skillAudit from './active/skill-audit';
 import adminEndpointProbe from './passive/admin-endpoint-probe';
+import apiKeyExposure from './passive/api-key-exposure';
 import containerVersion from './passive/container-version';
 import cookieAudit from './passive/cookie-audit';
 import corsAudit from './passive/cors-audit';
@@ -29,6 +30,7 @@ const allChecks = [
   healthFingerprint,
   versionCve,
   securityHeaders,
+  apiKeyExposure,
   cspDeepAudit,
   corsAudit,
   rateLimitProbe,

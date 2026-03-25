@@ -5,9 +5,9 @@
 
 ## 已验证项
 
-- `bun run lint`：通过（`Checked 115 files in 45ms`）
+- `bun run lint`：通过（`Checked 116 files in 21ms`）
 - `bun run typecheck`：通过
-- `bun test`：通过（246 个测试）
+- `bun test`：通过（249 个测试）
 - `bun run build`：通过
 
 ## 本轮完成项
@@ -31,6 +31,8 @@
 - 已新增 `/api/community/intelligence/community` 端点，用于返回 community threat signals。
 - 已新增 `packages/scanner-core/src/checks/passive/csp-deep-audit.ts`，用于分析 `Content-Security-Policy` 的脚本执行风险、宽泛来源、`object-src`、`base-uri` 与 `frame-ancestors` 配置强度。
 - 已将 `CSP deep audit` 在 `ROADMAP.md` 中标记为完成，并同步更新当前测试数与 scanner checks 数量。
+- 已新增 `packages/scanner-core/src/checks/passive/api-key-exposure.ts`，用于扫描公开响应 body/headers 中的高信号 API key / token 泄露模式，并对证据做截断掩码。
+- 已将 `API key exposure` 在 `ROADMAP.md` 中标记为完成，并同步更新当前测试数与 scanner checks 数量。
 
 ## 新增验证覆盖
 

@@ -2,10 +2,10 @@
 
 ## Current State (v0.2.0 — 2026-03-17)
 
-**Core platform**: Scanner (21 checks), CLI, Web dashboard, Browser extension, Intelligence board.
+**Core platform**: Scanner (22 checks), CLI, Web dashboard, Browser extension, Intelligence board.
 **SaaS layer**: Auth (Google/GitHub OAuth), Stripe billing (free/starter), projects, reusable deep-scan pairings, quotas.
 **Infrastructure**: Cloudflare Workers + D1 + Queues, multi-env deploy (staging/production).
-**Quality**: 246 tests, TypeScript strict, Biome lint, Zod validation, rate limiting.
+**Quality**: 249 tests, TypeScript strict, Biome lint, Zod validation, rate limiting.
 
 ---
 
@@ -14,7 +14,7 @@
 ### New checks
 - [x] CSP (Content-Security-Policy) deep audit — directive analysis, unsafe-inline detection
 - [ ] Dependency vulnerability scan — match `package.json` deps against known CVE databases
-- [ ] API key exposure — scan public endpoints for leaked keys/tokens in responses
+- [x] API key exposure — scan public endpoints for leaked keys/tokens in responses
 - [ ] Container escape surface — probe for container metadata endpoints
 - [ ] Agent permission overreach — audit tool permissions vs actual usage
 
