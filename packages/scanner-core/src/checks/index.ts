@@ -11,6 +11,7 @@ import adminEndpointProbe from './passive/admin-endpoint-probe';
 import containerVersion from './passive/container-version';
 import cookieAudit from './passive/cookie-audit';
 import corsAudit from './passive/cors-audit';
+import cspDeepAudit from './passive/csp-deep-audit';
 import errorDisclosure from './passive/error-disclosure';
 // Passive checks
 import healthFingerprint from './passive/health-fingerprint';
@@ -28,6 +29,7 @@ const allChecks = [
   healthFingerprint,
   versionCve,
   securityHeaders,
+  cspDeepAudit,
   corsAudit,
   rateLimitProbe,
   oauthEnumeration,

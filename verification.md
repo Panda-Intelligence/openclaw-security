@@ -5,9 +5,9 @@
 
 ## 已验证项
 
-- `bun run lint`：通过（`Checked 114 files in 49ms`）
+- `bun run lint`：通过（`Checked 115 files in 45ms`）
 - `bun run typecheck`：通过
-- `bun test`：通过（243 个测试）
+- `bun test`：通过（246 个测试）
 - `bun run build`：通过
 
 ## 本轮完成项
@@ -29,6 +29,8 @@
 - 已让 intelligence advisory 结合 `community_reports.platform_version` 聚合结果，在信号中显示社区已观测部署数量。
 - 已新增 community threat signals 聚合：基于 `community_reports` 与 `findings` 生成匿名部署严重度集中度、最高频问题与近 30 天低分压力信号，并接入 intelligence overview / route / 页面展示。
 - 已新增 `/api/community/intelligence/community` 端点，用于返回 community threat signals。
+- 已新增 `packages/scanner-core/src/checks/passive/csp-deep-audit.ts`，用于分析 `Content-Security-Policy` 的脚本执行风险、宽泛来源、`object-src`、`base-uri` 与 `frame-ancestors` 配置强度。
+- 已将 `CSP deep audit` 在 `ROADMAP.md` 中标记为完成，并同步更新当前测试数与 scanner checks 数量。
 
 ## 新增验证覆盖
 
