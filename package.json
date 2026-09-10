@@ -43,7 +43,7 @@
     "db:migrate:remote": "cd apps/web && bunx wrangler d1 migrations apply openclaw-security-db --remote"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.4.7",
+    "@biomejs/biome": "^2.4.8",
     "@types/bun": "^1.2.0",
     "typescript": "^5.7.0"
   }
