@@ -2,7 +2,13 @@ import type { ScanConfig, ScanResult } from '@panda-ai/ocs-core';
 import { scan } from '@panda-ai/ocs-core';
 import type { Env } from '../worker';
 
-export async function handleScanQueue(message: { scanId: string; jwt?: string }, env: Env): Promise<void> {
+type ScanExecutor = (config: ScanConfig) => Promise<ScanResult>;
+
+export async function handleScanQueue(
+  message: { scanId: string; jwt?: string },
+  env: Env,
+  runScan: ScanExecutor = scan,
+): Promise<void> {
   const { scanId, jwt } = message;
 
   // Get scan record
@@ -24,7 +30,7 @@ export async function handleScanQueue(message: { scanId: string; jwt?: string },
       concurrency: 5,
     };
 
-    const result: ScanResult = await scan(config);
+    const result: ScanResult = await runScan(config);
 
     // Store findings
     for (const finding of result.findings) {

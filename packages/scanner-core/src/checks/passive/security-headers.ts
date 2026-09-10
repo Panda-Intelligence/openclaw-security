@@ -23,12 +23,6 @@ const HEADER_CHECKS: HeaderCheck[] = [
   {
     header: 'content-security-policy',
     required: true,
-    validate: (v) => {
-      if (v.includes("'unsafe-inline'") && v.includes("'unsafe-eval'")) {
-        return "CSP includes both 'unsafe-inline' and 'unsafe-eval'";
-      }
-      return null;
-    },
     recommendation: 'Set a restrictive Content-Security-Policy header',
     cweId: 'CWE-693',
   },

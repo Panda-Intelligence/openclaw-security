@@ -5,11 +5,15 @@ import type { IntelligenceBoardItem, IntelligenceOverview } from '../lib/api';
 const sectionAnchors = [
   { id: 'skills-watch', label: 'Skills' },
   { id: 'release-watch', label: 'Releases' },
+  { id: 'community-threat-signals', label: 'Community' },
+  { id: 'version-advisories', label: 'Advisories' },
   { id: 'install-hardening', label: 'Install' },
   { id: 'llm-security', label: 'LLM' },
   { id: 'gateway-hardening', label: 'Gateway' },
   { id: 'official-sources', label: 'Sources' },
 ] as const;
+
+const INTELLIGENCE_BOARD_COUNT = sectionAnchors.length - 1;
 
 const researchPillars = [
   {
@@ -19,6 +23,10 @@ const researchPillars = [
   {
     title: 'Release & dependency posture',
     copy: 'Keep release cadence, dependency-sensitive changes, and security-heavy rollout notes visible for operators and buyers.',
+  },
+  {
+    title: 'Community threat pressure',
+    copy: 'Aggregate anonymous deployment findings into repeatable threat signals that show where operators are still struggling.',
   },
   {
     title: 'Installation hardening',
@@ -32,6 +40,7 @@ const researchPillars = [
 
 const methodologySteps = [
   'Use official OpenClaw docs and release notes as the primary source of truth.',
+  'Correlate anonymous community scan outcomes to highlight repeated operator failures and emerging pressure points.',
   'Translate platform changes into operator-facing audit signals rather than generic security headlines.',
   'Prioritize skills, install posture, dependency behavior, and LLM runtime boundaries.',
   'Keep every board item short, source-linked, and usable in a live OpenClaw security audit workflow.',
@@ -100,10 +109,12 @@ export default function IntelligencePage() {
     });
 
   const skillsItems = applyFilters(overview.marketplaceSkills);
+  const communityItems = applyFilters(overview.communitySignals);
+  const advisoryItems = applyFilters(overview.versionAdvisories);
   const installItems = applyFilters(overview.installHardening);
   const llmItems = applyFilters(overview.llmSecurity);
   const gatewayItems = applyFilters(overview.gatewayHardening);
-  const allRiskItems = [...skillsItems, ...installItems, ...llmItems, ...gatewayItems];
+  const allRiskItems = [...skillsItems, ...communityItems, ...advisoryItems, ...installItems, ...llmItems, ...gatewayItems];
   const severitySummary = allRiskItems.reduce(
     (acc, item) => {
       acc[item.risk] += 1;
@@ -111,21 +122,28 @@ export default function IntelligencePage() {
     },
     { critical: 0, high: 0, medium: 0, low: 0 } as Record<'critical' | 'high' | 'medium' | 'low', number>,
   );
-  const totalVisibleSignals = skillsItems.length + installItems.length + llmItems.length + gatewayItems.length + overview.releases.length;
+  const totalVisibleSignals =
+    skillsItems.length +
+    communityItems.length +
+    advisoryItems.length +
+    installItems.length +
+    llmItems.length +
+    gatewayItems.length +
+    overview.releases.length;
 
   return (
     <div className="page-medium">
       <div className="page-header">
         <h1 style={{ fontSize: '3rem' }}>OpenClaw Security Audit Intelligence</h1>
         <p>
-          Public, source-linked operator research for OpenClaw marketplace skills, release posture, install safety, and
-          LLM runtime risk. Last updated {overview.capturedAt}.
+          Public, source-linked operator research for OpenClaw marketplace skills, release posture, anonymous community
+          threat pressure, install safety, and LLM runtime risk. Last updated {overview.capturedAt}.
         </p>
       </div>
 
       <section className="dashboard-summary fade-up">
         <div className="dashboard-summary-card">
-          <strong>5</strong>
+          <strong>{INTELLIGENCE_BOARD_COUNT}</strong>
           <span>Intelligence boards</span>
         </div>
         <div className="dashboard-summary-card">
@@ -147,7 +165,8 @@ export default function IntelligencePage() {
           <h2 className="dashboard-card-title">Why this OpenClaw security audit board matters</h2>
           <p className="dashboard-card-copy">
             This page is built as a public research surface for OpenClaw security, with special focus on audit-ready
-            topics: marketplace skills, release and dependency posture, installation hardening, and LLM runtime safety.
+            topics: marketplace skills, release and dependency posture, community threat pressure, installation
+            hardening, and LLM runtime safety.
           </p>
           <div className="intel-severity-grid">
             {(['critical', 'high', 'medium', 'low'] as const).map((risk) => (
@@ -199,7 +218,7 @@ export default function IntelligencePage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="field-input"
-                placeholder="Search skills, releases, LLM risks, gateway exposure..."
+                placeholder="Search skills, community signals, advisories, releases, LLM risks, gateway exposure..."
               />
               <div className="filter-chip-row">
                 {(['all', 'critical', 'high', 'medium', 'low'] as const).map((risk) => (
@@ -280,6 +299,20 @@ export default function IntelligencePage() {
                 ))}
               </div>
             </section>
+
+            <BoardSection
+              id="community-threat-signals"
+              title="Community threat signals"
+              copy="Aggregate anonymous deployment findings into a concise picture of repeated failures, severe finding concentration, and recent low-score pressure."
+              items={communityItems}
+            />
+
+            <BoardSection
+              id="version-advisories"
+              title="Version advisory & CVE watch"
+              copy="Surface which release lines still carry tracked advisories or end-of-life status in the shared scanner-core version database."
+              items={advisoryItems}
+            />
           </div>
 
           <div className="community-column">

@@ -127,6 +127,8 @@ export interface IntelligenceOverview {
   sources: IntelligenceSource[];
   marketplaceSkills: IntelligenceBoardItem[];
   releases: ReleaseWatchItem[];
+  communitySignals: IntelligenceBoardItem[];
+  versionAdvisories: IntelligenceBoardItem[];
   installHardening: IntelligenceBoardItem[];
   llmSecurity: IntelligenceBoardItem[];
   gatewayHardening: IntelligenceBoardItem[];

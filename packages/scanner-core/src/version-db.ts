@@ -1,19 +1,20 @@
-interface VersionEntry {
+import { getOpenClawUpstreamSnapshot, type OpenClawUpstreamSnapshot } from './openclaw-upstream';
+
+export interface VersionEntry {
   version: string;
   cves: CveEntry[];
   releaseDate: string;
   eol?: boolean;
 }
 
-interface CveEntry {
+export interface CveEntry {
   id: string;
   severity: 'critical' | 'high' | 'medium' | 'low';
   description: string;
   fixedIn?: string;
 }
 
-/** Known OpenClaw versions and associated CVEs. Updated manually. */
-const VERSION_DATABASE: VersionEntry[] = [
+const MANUAL_VERSION_DATABASE: VersionEntry[] = [
   {
     version: '0.1.0',
     releaseDate: '2025-12-01',
@@ -52,8 +53,46 @@ const VERSION_DATABASE: VersionEntry[] = [
   },
 ];
 
+export function buildVersionDatabaseFromSnapshot(upstream: OpenClawUpstreamSnapshot): VersionEntry[] {
+  const merged = new Map<string, VersionEntry>();
+
+  for (const entry of MANUAL_VERSION_DATABASE) {
+    merged.set(entry.version, {
+      ...entry,
+      cves: entry.cves.map((cve) => ({ ...cve })),
+    });
+  }
+
+  for (const release of upstream.releases) {
+    if (release.prerelease) continue;
+
+    const existing = merged.get(release.version);
+    merged.set(release.version, {
+      version: release.version,
+      releaseDate: release.publishedAt.slice(0, 10),
+      cves: existing?.cves ?? [],
+      eol: existing?.eol,
+    });
+  }
+
+  return [...merged.values()].sort((left, right) => left.releaseDate.localeCompare(right.releaseDate));
+}
+
+function buildVersionDatabase(): VersionEntry[] {
+  return buildVersionDatabaseFromSnapshot(getOpenClawUpstreamSnapshot());
+}
+
+const VERSION_DATABASE: VersionEntry[] = buildVersionDatabase();
+
 export function lookupVersion(version: string): VersionEntry | undefined {
   return VERSION_DATABASE.find((v) => v.version === version);
+}
+
+export function getVersionDatabase(): VersionEntry[] {
+  return VERSION_DATABASE.map((entry) => ({
+    ...entry,
+    cves: entry.cves.map((cve) => ({ ...cve })),
+  }));
 }
 
 export function getCvesForVersion(version: string): CveEntry[] {
@@ -67,8 +106,7 @@ export function isEol(version: string): boolean {
 }
 
 export function getLatestVersion(): string {
-  const last = VERSION_DATABASE[VERSION_DATABASE.length - 1];
-  return last?.version ?? '0.0.0';
+  return getOpenClawUpstreamSnapshot().latestStableVersion;
 }
 
 export function isOutdated(version: string): boolean {

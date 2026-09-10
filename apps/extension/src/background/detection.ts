@@ -1,3 +1,5 @@
+import { scan, type Finding, type ScanConfig, type ScanResult } from '@panda-ai/ocs-core';
+
 export interface DetectionResult {
   isOpenClaw: boolean;
   version: string | null;
@@ -11,77 +13,55 @@ export interface QuickFinding {
   severity: 'critical' | 'high' | 'medium' | 'low' | 'info';
 }
 
-export async function detectOpenClaw(origin: string): Promise<DetectionResult | null> {
-  const result: DetectionResult = {
-    isOpenClaw: false,
-    version: null,
-    score: null,
-    findings: [],
-    detectedAt: Date.now(),
+const QUICK_PASSIVE_CHECKS = [
+  'version-cve',
+  'security-headers',
+  'cors-audit',
+  'admin-endpoint-probe',
+  'hsts-preload',
+] as const satisfies readonly string[];
+
+type ScanExecutor = (config: ScanConfig) => Promise<ScanResult>;
+
+function mapFindingToQuickFinding(finding: Finding): QuickFinding {
+  return {
+    title: finding.title,
+    severity: finding.severity,
   };
+}
 
-  // Step 1: Health check
-  try {
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 3000);
-
-    const resp = await fetch(`${origin}/health`, { signal: controller.signal });
-    clearTimeout(timer);
-
-    if (resp.ok) {
-      const data = await resp.json();
-      if (data.status === 'ok') {
-        result.isOpenClaw = true;
-        result.version = data.version ?? null;
-      }
-    }
-  } catch {
-    return null; // Not reachable or not OpenClaw
+export function mapScanResultToDetectionResult(scanResult: ScanResult, detectedAt = Date.now()): DetectionResult {
+  if (!scanResult.platformInfo.isOpenClaw) {
+    return {
+      isOpenClaw: false,
+      version: scanResult.platformInfo.version,
+      score: null,
+      findings: [],
+      detectedAt,
+    };
   }
 
-  if (!result.isOpenClaw) return result;
+  return {
+    isOpenClaw: true,
+    version: scanResult.platformInfo.version,
+    score: scanResult.score,
+    findings: scanResult.findings.slice(0, 5).map(mapFindingToQuickFinding),
+    detectedAt,
+  };
+}
 
-  // Step 2: Quick passive checks (top 5)
-  let deductions = 0;
-
-  // Check security headers
+export async function detectOpenClaw(origin: string, runScan: ScanExecutor = scan): Promise<DetectionResult | null> {
   try {
-    const resp = await fetch(origin);
-    const headers = Object.fromEntries([...resp.headers.entries()].map(([k, v]) => [k.toLowerCase(), v]));
-
-    if (!headers['strict-transport-security']) {
-      result.findings.push({ title: 'Missing HSTS header', severity: 'high' });
-      deductions += 10;
-    }
-    if (!headers['content-security-policy']) {
-      result.findings.push({ title: 'Missing CSP header', severity: 'high' });
-      deductions += 10;
-    }
-    if (!headers['x-content-type-options']) {
-      result.findings.push({ title: 'Missing X-Content-Type-Options', severity: 'high' });
-      deductions += 10;
-    }
-
-    // CORS check
-    const corsResp = await fetch(`${origin}/api/billing/plans`, {
-      headers: { Origin: 'https://evil.example.com' },
+    const scanResult = await runScan({
+      targetUrl: origin,
+      mode: 'passive',
+      checks: [...QUICK_PASSIVE_CHECKS],
+      timeout: 5000,
+      concurrency: 3,
     });
-    const acao = corsResp.headers.get('access-control-allow-origin');
-    if (acao === '*' || acao === 'https://evil.example.com') {
-      result.findings.push({ title: 'Permissive CORS', severity: 'critical' });
-      deductions += 20;
-    }
 
-    // Public endpoint check
-    const adminResp = await fetch(`${origin}/api/billing/admin/credits/grant`);
-    if (adminResp.ok) {
-      result.findings.push({ title: 'Admin endpoint unprotected', severity: 'critical' });
-      deductions += 20;
-    }
+    return mapScanResultToDetectionResult(scanResult);
   } catch {
-    /* partial checks ok */
+    return null;
   }
-
-  result.score = Math.max(0, 100 - deductions);
-  return result;
 }
